@@ -119,7 +119,8 @@ input[type=range]{width:200px;vertical-align:middle}
   <div class="row"><div class="g">Simpan otomatis tiap 60 detik</div><span>Aktif</span></div>
   <button class="btn big" id="bReset">Mulai Game Baru</button></div>
 <div id="pMenu" class="panel px" style="width:320px"><h2>MENU</h2>
-  <button class="btn big" data-close>Lanjutkan</button><button class="btn big" data-open="pInv">Tas</button><button class="btn big" data-open="pQuest">Misi</button><button class="btn big" data-open="pCraft">Crafting</button><button class="btn big" data-open="pCal">Kalender</button><button class="btn big" data-open="pSet">Pengaturan</button><button class="btn big" id="bSave">Simpan Game</button><button class="btn big" id="bLoad">Muat Game</button><div id="acctTxt" style="font-size:8px;margin:10px 0 2px;line-height:1.6;word-break:break-all"></div><button class="btn big" id="bCloud" style="display:none">Simpan ke Cloud</button><button class="btn big" id="bHomeM" style="display:none">Pulang ke Desamu</button><button class="btn big" id="bRoom" style="display:none">Ganti Ruangan Online</button><button class="btn big" id="bAcct" style="display:none">Masuk / Daftar</button><button class="btn big" id="bMode">Ganti Mode</button></div>
+  <button class="btn big" data-close>Lanjutkan</button><button class="btn big" data-open="pInv">Tas</button><button class="btn big" data-open="pQuest">Misi</button><button class="btn big" data-open="pCraft">Crafting</button><button class="btn big" data-open="pCal">Kalender</button><button class="btn big" data-open="pSet">Pengaturan</button><button class="btn big" id="bSave">Simpan Game</button><button class="btn big" id="bLoad">Muat Game</button><div id="acctTxt" style="font-size:8px;margin:10px 0 2px;line-height:1.6;word-break:break-all"></div><button class="btn big" id="bCloud" style="display:none">Simpan ke Cloud</button><button class="btn big" id="bHomeM" style="display:none">Pulang ke Desamu</button><button class="btn big" id="bVisit" style="display:none">Kunjungi Desa Pemain</button><button class="btn big" id="bRoom" style="display:none">Ganti Ruangan Online</button><button class="btn big" id="bAcct" style="display:none">Masuk / Daftar</button><button class="btn big" id="bMode">Ganti Mode</button><button class="btn big" id="bTest">Tes: Tampilkan Jalan Desa Lain</button></div>
+<div id="pVisit" class="panel px" style="width:340px"><button class="btn x" data-close>X</button><h2>DESA PEMAIN ONLINE</h2><div id="visitList"></div></div>
 <div id="pChest" class="panel px"><button class="btn x" data-close>X</button><h2>PETI</h2><div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center"><div><div style="margin-bottom:4px">Isi Peti</div><div class="grid" id="chGrid"></div></div><div><div style="margin-bottom:4px">Tasmu</div><div class="grid" id="chInv"></div></div></div><div style="margin-top:8px;font-size:8px">Klik item untuk memindahkan.</div></div>
 
 <script>
@@ -442,6 +443,7 @@ function genWorld(){
  const path=(x0,y0,x1,y1,t)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(ground[y*W+x]!==1)set(x,y,t);};
  path(3,27,76,28,2);path(30,3,31,H-4,2);path(8,8,9,12,2);path(5,12,30,12,5);path(15,29,16,31,2);path(52,20,53,56,2);path(44,7,64,19,3);path(32,12,43,13,2);
  for(let y=27;y<=28;y++)for(let x=33;x<=46;x++)if(ground[y*W+x]===1)set(x,y,4);
+ for(let y=12;y<=13;y++)for(let x=32;x<=45;x++)if(ground[y*W+x]===1)set(x,y,4);
  for(let y=15;y<=19;y++){for(let x=8;x<=13;x++)soil[idx(x,y)]={wet:0,crop:null,prog:0};for(let x=19;x<=24;x++)soil[idx(x,y)]={wet:0,crop:null,prog:0};}
  const fence=(x,y)=>{if(inb(x,y)&&ground[y*W+x]===0)placed[y*W+x]={t:'fence'};};
  for(let x=5;x<=29;x++)if(x!==17&&x!==18){fence(x,13);fence(x,25);}
@@ -566,7 +568,7 @@ function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';toa
 function isPaused(){return !!curPanel||!!dlg;}
 function openPanel(id){if(visiting&&id!=='pMenu'&&id!=='pSet'&&id!=='pCal'){toast('Tidak tersedia saat berkunjung.');return;}closePanels(true);curPanel=id;$(id).style.display='block';renderPanel(id);}
 function closePanels(keep){if(curPanel){$(curPanel).style.display='none';}curPanel=null;if(!keep){invSel=null;}}
-function renderPanel(id){({pInv:renderInv,pShop:renderShop,pCraft:renderCraft,pQuest:renderQuest,pCal:renderCal,pSet:renderSet,pMenu:()=>{},pChest:renderChest})[id]();}
+function renderPanel(id){({pInv:renderInv,pShop:renderShop,pCraft:renderCraft,pQuest:renderQuest,pCal:renderCal,pSet:renderSet,pMenu:()=>{},pChest:renderChest,pVisit:renderVisit})[id]();}
 function slotHTML(s,i,cls,showNum){return '<div class="slot '+(cls||'')+'" data-i="'+i+'" draggable="true">'+(s?'<img src="'+iconURL(s.id)+'"><b>'+(s.n>1?s.n:'')+'</b>':'')+(showNum&&i<8?'<i>'+(i+1)+'</i>':'')+'</div>';}
 function renderInv(){
  let h='';for(let i=0;i<inv.length;i++)h+=slotHTML(inv[i],i,(i===sel?'sel ':'')+(i===invSel?'hold':''),true);
@@ -646,6 +648,13 @@ $('bCloud').onclick=()=>{if(visiting)return toast('Pulang ke desamu dulu.');save
 $('bAcct').onclick=async()=>{
  if(user){if(!confirm('Keluar dari akun '+(user.email||'')+'? Progres disimpan dulu.'))return;try{saveGame(true);await pushCloud(true);await sb.auth.signOut();}catch(e){console.error(e);}location.reload();}
  else{closePanels();showLogin();}};
+$('bTest').onclick=()=>{
+ if(visiting)return toast('Pulang ke desamu dulu.');
+ if(remotes.__test){delete remotes.__test;closePanels();return toast('Desa tes ditutup.');}
+ const q=[0,1,2,3].find(k=>!Object.values(remotes).some(r=>r.slot===k));
+ if(q===undefined)return toast('Semua jalur sudah terpakai.');
+ remotes.__test={id:'__test',x:0,y:0,tx:0,ty:0,anim:0,pal:palFor('test'),say:'',sayT:0,n:'Tes',u:'',at:'__none',seen:Infinity,slot:q,d:0,m:0,run:0};
+ closePanels();toast('Jalan desa tes terbuka di alun-alun arah '+GDEF[q].nm+'.');};
 $('bMode').onclick=async()=>{
  if(!confirm('Ganti mode? Progres disimpan dulu, lalu kembali ke layar pilihan mode.'))return;
  try{saveGame(true);if(cloudEnabled())await pushCloud(true);}catch(e){console.error(e);}
@@ -1026,7 +1035,7 @@ function updateAcct(){const a=$('acctTxt');if(!a)return;
  $('bAcct').style.display=(MODE!=='local'&&sb)?'block':'none';$('bAcct').textContent=user?'Keluar akun':'Masuk / Daftar';
  $('bRoom').style.display='none';
  $('bCloud').style.display=cloudEnabled()?'block':'none';
- $('bMode').style.display='block';}
+ $('bMode').style.display='block';$('bVisit').style.display=(cloudEnabled()&&!visiting)?'block':'none';}
 async function pushCloud(force,snap){
  if(visiting)return false;
  if(!cloudEnabled())return false;
@@ -1164,9 +1173,19 @@ function cleanVillage(d){
  if(Array.isArray(d.animals)&&d.animals.length<=11){for(const a of d.animals){if(!a||typeof a!=='object'||typeof a.t!=='string'||!has(ANSP,a.t)||a.t==='sheared'){o.animals=[];break;}
   o.animals.push({t:a.t,name:String(a.name||'').slice(0,12),x:clamp(num(a.x,0),0,W*T),y:clamp(num(a.y,0),0,H*T),fed:!!a.fed,ready:!!a.ready,timer:clamp(num(a.timer,0),0,2)});}}
  return o;}
-function showVisitBar(){$('visitTxt').textContent='Berkunjung ke Desa '+visiting.name+(visiting.upd?' | data '+new Date(visiting.upd).toLocaleString('id-ID'):'');$('visitBar').style.display='flex';$('bHomeM').style.display='block';}
-function hideVisitBar(){$('visitBar').style.display='none';$('bHomeM').style.display='none';}
+function showVisitBar(){$('visitTxt').textContent='Berkunjung ke Desa '+visiting.name+(visiting.upd?' | data '+new Date(visiting.upd).toLocaleString('id-ID'):'');$('visitBar').style.display='flex';$('bHomeM').style.display='block';$('bVisit').style.display='none';}
+function hideVisitBar(){$('visitBar').style.display='none';$('bHomeM').style.display='none';$('bVisit').style.display=cloudEnabled()?'block':'none';}
+function renderVisit(){
+ const el=$('visitList');const list=[];
+ for(const id in remotes){const r=remotes[id];if(r.u&&user&&r.u!==user.id&&!list.some(x=>x.u===r.u))list.push(r);}
+ if(!list.length){el.innerHTML='<p style="margin:8px 0">Belum ada pemain lain yang online di ruangan ini. Ajak temanmu masuk ke mode dan ruangan yang sama.</p>';return;}
+ el.innerHTML='<p style="margin:4px 0 8px">Pilih desa yang mau dikunjungi:</p>';
+ for(const r of list){const row=document.createElement('div');row.className='row';
+  const g=document.createElement('div');g.className='g';g.textContent='Desa '+r.n;row.appendChild(g);
+  const b=document.createElement('button');b.className='btn';b.textContent='Kunjungi';b.onclick=()=>{closePanels();visitVillage(r);};row.appendChild(b);el.appendChild(row);}}
+$('bVisit').onclick=()=>{if(visiting)return;openPanel('pVisit');};
 async function visitVillage(r){
+ if(r&&r.id==='__test'){toast('Ini desa tes, hanya untuk melihat jalan dan gerbang.');return;}
  if(visiting||visitBusy||!cloudEnabled()||!r||!UUID.test(r.u))return;visitBusy=true;
  try{
   toast('Menuju Desa '+r.n+'...');
@@ -1265,7 +1284,7 @@ function renderOnl(){
  const e=$('onl');let t;
  if(!cloudEnabled())t=MODE==='local'?'Mode Lokal. Tanpa akun, tidak online.':'Belum login.';
  else if(!mpOn)t='Menghubungkan online...';
- else t='Online: '+mpCount+' | Ruangan: '+(MODE==='private'?'Privat':'Publik')+' | Enter: chat';
+ else t='Online: '+mpCount+' | Ruangan: '+(MODE==='private'?'Privat':'Publik')+' | Desa lain: '+Object.keys(remotes).filter(k=>remotes[k].slot>=0).length+' | Enter: chat';
  if(e.textContent!==t)e.textContent=t;
  renderChat();
 }

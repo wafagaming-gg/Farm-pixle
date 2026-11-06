@@ -327,7 +327,9 @@ const PAL={player:{hair:'#6a3a18',skin:'#f4c8a0',shirt:'#d8483a',pants:'#3a4a7a'
  Mira:{hair:'#c8402a',skin:'#f4c8a0',shirt:'#3aa06a',pants:'#7a4a8a',shoe:'#3a2410'},
  'Pak Joko':{hair:'#e8e8e8',skin:'#e8b890',shirt:'#8a5a2c',pants:'#4a5a8a',shoe:'#3a2410',hat:'#d8b858'},
  'Bu Sari':{hair:'#f0d060',skin:'#f4c8a0',shirt:'#e0709a',pants:'#5a4a7a',shoe:'#3a2410'},
- Dika:{hair:'#2a1a10',skin:'#d8a070',shirt:'#e8c43a',pants:'#3a6a9a',shoe:'#3a2410'}};
+ Dika:{hair:'#2a1a10',skin:'#d8a070',shirt:'#e8c43a',pants:'#3a6a9a',shoe:'#3a2410'},
+ 'Pak Budi':{hair:'#6a3a18',skin:'#d8a070',shirt:'#4a7ad8',pants:'#5a4a3a',shoe:'#3a2410',hat:'#e6c15a'},
+ 'Bu Ani':{hair:'#2a1a10',skin:'#f4c8a0',shirt:'#e8943a',pants:'#7a4a8a',shoe:'#3a2410'}};
 // animals (facing right, 24x20)
 function drawAnimal(g,t,fr,sheared){const a=fr?1:0;
  if(t==='chicken'){R(g,'#e8e8e8',5,9,3,4);disc(g,'#f8f8f8',11,13,4);R(g,'#dcdcdc',9,12,4,3);disc(g,'#f8f8f8',16,9,2);R(g,'#d83a2e',15,6,3,2);R(g,'#f0a020',18,9,2,1);R(g,'#222',17,8,1,1);R(g,fr?'#f0a020':'#f0a020',fr?11:10,17,1,3);R(g,'#f0a020',fr?12:13,17,1,3);}
@@ -411,6 +413,26 @@ const idx=(x,y)=>y*W+x,inb=(x,y)=>x>=0&&y>=0&&x<W&&y<H;
 const rcx=y=>39+Math.round(Math.sin(y/7)*1.5);
 
 function refSolid(i){const o=objs[i],p=placed[i];solid[i]=(base[i]||(o&&o.t!=='flower'&&!(o.t==='tree'&&o.stump))||(p&&SOLIDP[p.t]))?1:0;}
+/* Pusat desa (alun-alun) di timur laut. Jalan utara (x30-31) bercabang ke alun-alun lewat jalan penghubung.
+   Dari alun-alun ada 4 jalur ke tepi peta. Jalur hanya jadi jalan + bergerbang saat ada pemain lain online. */
+const GATES=4;
+const GDEF=[
+ {nm:'utara',t:[[50,2],[51,2]],road:[50,2,51,6],in:{x:51*T,y:3*T+8,d:1}},
+ {nm:'timur',t:[[77,12],[77,13]],road:[65,12,77,13],in:{x:76*T+8,y:13*T,d:3}},
+ {nm:'tenggara',t:[[77,16],[77,17]],road:[65,16,77,17],in:{x:76*T+8,y:17*T,d:3}},
+ {nm:'timur laut',t:[[62,2],[63,2]],road:[62,2,63,6],in:{x:63*T,y:3*T+8,d:1}}];
+const LINK=[32,12,45,13];
+function inRect(x,y,r){return x>=r[0]&&x<=r[2]&&y>=r[1]&&y<=r[3];}
+function inGateZone(x,y){if(inRect(x,y,LINK))return true;for(const g of GDEF)if(inRect(x,y,g.road))return true;return false;}
+function clearGateZones(){
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(inGateZone(x,y)){const i=y*W+x;if(objs[i]&&objs[i].t!=='pine')objs[i]=null;if(placed[i])delete placed[i];if(soil[i])delete soil[i];}
+ syncRoads(true);}
+let roadMask=-1;
+function roadMaskNow(){let m=0;if(visiting){m|=1<<(visiting.slot>=0?visiting.slot:0);}else for(const id in remotes){const r=remotes[id];if(r.slot>=0)m|=1<<r.slot;}return m;}
+function syncRoads(force){
+ const m=roadMaskNow();if(!force&&m===roadMask)return;roadMask=m;
+ for(let q=0;q<GATES;q++){const on=(m>>q)&1,r=GDEF[q].road;
+  for(let y=r[1];y<=r[3];y++)for(let x=r[0];x<=r[2];x++){const i=y*W+x;if(ground[i]===0||ground[i]===2)ground[i]=on?2:0;}}}
 function genWorld(){
  ground.fill(0);base.fill(0);objs.fill(null);bigs=[];placed={};soil={};chests={};
  const R2=rnd(4242),set=(x,y,v)=>{if(inb(x,y))ground[y*W+x]=v;};
@@ -418,7 +440,7 @@ function genWorld(){
  for(let y=38;y<=54;y++)for(let x=54;x<=76;x++){const dx=(x-65)/10,dy=(y-46)/6;if(dx*dx+dy*dy<=1)set(x,y,1);}
  for(let y=21;y<=24;y++)for(let x=25;x<=28;x++){const dx=(x-26.5)/2.2,dy=(y-22.5)/1.8;if(dx*dx+dy*dy<=1)set(x,y,1);}
  const path=(x0,y0,x1,y1,t)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(ground[y*W+x]!==1)set(x,y,t);};
- path(3,27,76,28,2);path(30,3,31,H-4,2);path(8,8,9,12,2);path(5,12,30,12,5);path(15,29,16,31,2);path(52,20,53,56,2);path(44,7,64,19,3);
+ path(3,27,76,28,2);path(30,3,31,H-4,2);path(8,8,9,12,2);path(5,12,30,12,5);path(15,29,16,31,2);path(52,20,53,56,2);path(44,7,64,19,3);path(32,12,43,13,2);
  for(let y=27;y<=28;y++)for(let x=33;x<=46;x++)if(ground[y*W+x]===1)set(x,y,4);
  for(let y=15;y<=19;y++){for(let x=8;x<=13;x++)soil[idx(x,y)]={wet:0,crop:null,prog:0};for(let x=19;x<=24;x++)soil[idx(x,y)]={wet:0,crop:null,prog:0};}
  const fence=(x,y)=>{if(inb(x,y)&&ground[y*W+x]===0)placed[y*W+x]={t:'fence'};};
@@ -445,6 +467,7 @@ function genWorld(){
  // forest lock row
  const sx=rcx(30)+2;for(let x=sx;x<=77;x++){if(x===52||x===53){if(!S.areas.forest)objs[30*W+x]={t:'gate'};}else objs[30*W+x]={t:'hedge'};}
  setupFarms(true);
+ clearGateZones();
  for(let i=0;i<W*H;i++)refSolid(i);
 }
 function bigAt(x,y){for(const b of bigs)if(x>=b.x&&x<b.x+b.w&&y>=b.y&&y<b.y+b.h)return b;return null;}
@@ -482,7 +505,9 @@ function initEntities(){
   {name:'Mira',role:'shop',home:[57*T,8*T+8],r:34,lines:['Selamat datang! Bibit segar dan alat kokoh ada di sini.']},
   {name:'Pak Joko',role:'farm',home:[24*T,28*T],r:70,lines:['Alurnya: cangkul, tanam, siram saat tanah kering, panen. Setelah panen tanah kembali biasa, cangkul lagi.','Hujan menyirami semua tanaman. Hari hujan adalah hari libur!','Ada 5 ladang besar dijual di Dataran Selatan. Ikuti jalan tanah ke selatan, lalu tekan E di gerbangnya untuk membeli.','Kubis dan labu lama tumbuhnya, tapi untungnya besar.','Tanam 5 wortel, lalu cek panel Misi. Ada hadiah menunggumu.','Sprinkler akan menyiram sekitarnya setiap pagi. Sangat praktis.']},
   {name:'Bu Sari',role:'herd',home:[15.5*T,30*T],r:30,lines:['Beri hewan Pakan lalu tunggu. Nanti mereka menghasilkan telur, susu, atau wol.','Pakan gratis ada di lumbung, sekali sehari. Tekan E di depan lumbung.','Kalau punya 3 telur, bawa untukku ya!']},
-  {name:'Dika',role:'kid',home:[46*T,28*T],r:90,lines:['Hutan timur masih terkunci. Beli Izin Hutan di toko Mira seharga 250 Gold.','Di hutan banyak kayu dan batu. Ada danau juga!','Jembatan ini enak buat jalan-jalan sore.']}
+  {name:'Pak Budi',role:'trader',home:[48*T+8,15*T+8],r:16,lines:['Sayur dan buah segar! Panenmu bisa kamu jual di lapak sebelah sana.','Air mancur ini airnya jernih. Boleh diminum langsung.','Lihat jalan di ujung alun-alun? Itu jalan ke desa pemain lain.']},
+ {name:'Bu Ani',role:'trader',home:[60*T,15*T+8],r:16,lines:['Roti hangat! Eh, belinya di toko Mira ya.','Kalau ada jalan baru muncul di alun-alun, berarti ada tamu baru datang.','Desa orang lain hanya boleh digarap pemiliknya. Kamu cukup berkunjung.']},
+ {name:'Dika',role:'kid',home:[46*T,28*T],r:90,lines:['Hutan timur masih terkunci. Beli Izin Hutan di toko Mira seharga 250 Gold.','Di hutan banyak kayu dan batu. Ada danau juga!','Jembatan ini enak buat jalan-jalan sore.']}
  ].map(n=>Object.assign(n,{x:n.home[0],y:n.home[1],dir:0,fr:0,anim:0,tm:Math.random()*2,tx:null,ty:null}));
 }
 function snapshot(){
@@ -505,7 +530,7 @@ function applyData(d){
   genWorld();
   for(let i=0;i<W*H;i++){if(objs[i]&&objs[i].dyn&&!(keepNew&&i>=W*58))objs[i]=null;}
   for(const a of d.dyn){const o={t:a[1],dyn:1};if(a[1]==='tree'){o.v=a[2];o.hp=a[3]||3;o.stump=a[4]||0;}else if(a[1]==='rock'){o.hp=a[3]||3;}else if(a[1]==='flower')o.v=a[2];objs[a[0]]=o;}
-  soil=d.soil;placed=d.placed;chests=d.chests||{};
+  soil=d.soil;placed=d.placed;chests=d.chests||{};clearGateZones();
   if((S.farmV||0)<2)migrateOldPlots();
   setupFarms((S.farmV||0)<2);S.farmV=2;
   for(let i=0;i<W*H;i++)refSolid(i);
@@ -532,7 +557,7 @@ function newDay(forced){
 }
 
 /* ================= COLLISION ================= */
-function blk(px,py){const tx=Math.floor(px/T),ty=Math.floor(py/T);if(!inb(tx,ty))return true;const i=ty*W+tx;return solid[i]===1||ground[i]===1;}
+function blk(px,py){const tx=Math.floor(px/T),ty=Math.floor(py/T);if(!inb(tx,ty))return true;const i=ty*W+tx;if((tx>=77||ty<=2)&&gateAt(tx,ty))return true;return solid[i]===1||ground[i]===1;}
 function canStand(x,y){return !blk(x-5,y-5)&&!blk(x+5,y-5)&&!blk(x-5,y)&&!blk(x+5,y);}
 function faceTile(){const d=DIRS[P.dir];return{x:Math.floor((P.x+d[0]*12)/T),y:Math.floor((P.y-4+d[1]*12)/T)};}
 
@@ -682,7 +707,8 @@ function tilePlaceOK(x,y,type){if(!inb(x,y))return false;const i=idx(x,y);if(gro
 function pickupPlaced(i){const p=placed[i];if(!p)return false;if(p.t==='chest'&&chests[i]&&chests[i].some(s=>s))return toast('Kosongkan peti dulu.'),true;if(space(p.t)<1)return toast('Tas penuh!'),true;addItem(p.t,1);delete placed[i];delete chests[i];refSolid(i);beep(300,.08);return true;}
 function lineTiles(f,n){const d=DIRS[P.dir],r=[];for(let k=0;k<n;k++)r.push({x:f.x+d[0]*k,y:f.y+d[1]*k});return r;}
 function useItem(){
- if(visiting||isPaused()||act)return;const f=faceTile();if(!inb(f.x,f.y))return;const i=idx(f.x,f.y),s=soil[i];
+ if(visiting){if(!isPaused()&&Date.now()-(useItem.vt||0)>3000){useItem.vt=Date.now();toast('Ini desa milik '+visiting.name+'. Hanya pemiliknya yang bisa menanam di sini.');}return;}
+ if(isPaused()||act)return;const f=faceTile();if(!inb(f.x,f.y))return;const i=idx(f.x,f.y),s=soil[i];
  if(s&&s.crop&&ripe(s)){startAct('harvest',()=>harvest(i),.45);return;}
  const it=inv[sel];if(!it)return;const D=ITEMS[it.id],id=it.id;
  if(id==='hoe'||id==='hoe2'){const tiles=lineTiles(f,id==='hoe2'?3:1);const ok=tiles.filter(t=>inb(t.x,t.y)&&canTill(t.x,t.y)&&ground[idx(t.x,t.y)]===0&&!solid[idx(t.x,t.y)]&&!soil[idx(t.x,t.y)]&&!placed[idx(t.x,t.y)]&&(!objs[idx(t.x,t.y)]||objs[idx(t.x,t.y)].t==='flower'));
@@ -752,7 +778,7 @@ function update(dt){
  // toast
  if(toastT>0){toastT-=dt;if(toastT<=0)$('toast').style.display='none';}
  saveT+=dt;if(saveT>60){saveT=0;saveGame(true);}else if(cloudDirty&&cloudEnabled()&&Date.now()-cloudT>20000){pushCloud(true);}
- mpTick(dt);
+ mpTick(dt);syncRoads();
  if(isPaused()){return;}
  // time
  S.t+=dt*1200/dayLenSec();if(S.t>=1560)newDay(true);
@@ -1098,19 +1124,22 @@ async function emailAuth(mode){
 /* ================= DESA PEMAIN LAIN (kunjungan, hanya-lihat) ================= */
 let visiting=null,home=null,visitBusy=false,villageErr='';
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const GATES=6;
 const has=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
 const OKPL={fence:1,chest:1,sprinkler:1,pot:1,bench:1,sign:1,scarecrow:1};
 function curVillage(){return visiting?visiting.uid:(user?user.id:'');}
-function gateXY(q){return{x:47+q*3,y:17};}
 function gateAt(x,y){
- if(visiting){const g=gateXY(0);return(x===g.x&&y===g.y)?{ret:1}:null;}
- for(const id in remotes){const r=remotes[id];if(r.slot>=0){const g=gateXY(r.slot);if(g.x===x&&g.y===y)return{r};}}
+ if(visiting){const g=GDEF[visiting.slot>=0?GDEF[visiting.slot].opp:0];for(const t of g.t)if(t[0]===x&&t[1]===y)return{ret:1};return null;}
+ for(const id in remotes){const r=remotes[id];if(r.slot>=0){for(const t of GDEF[r.slot].t)if(t[0]===x&&t[1]===y)return{r};}}
  return null;}
+function gateDraw(g,label,open){
+ const ty=g.t[g.t.length-1][1],cx=(g.t[0][0]+g.t[g.t.length-1][0]+1)*T/2,cy=(g.t[0][1]+g.t[g.t.length-1][1]+1)*T/2;
+ return{y:(ty+1)*T,d:()=>{
+  ctx.save();ctx.globalAlpha=.55+.25*Math.sin(Date.now()/350);ctx.drawImage(SP.glow,cx-32,cy-32);ctx.restore();
+  for(const t of g.t)ctx.drawImage(SP.gate,t[0]*T,t[1]*T-8);
+  nameTag(label,cx,Math.min(...g.t.map(t=>t[1]))*T-12);}};}
 function drawGatesInto(E){
- if(visiting){const g=gateXY(0);E.push({y:(g.y+1)*T,d:()=>{ctx.drawImage(SP.gate,g.x*T,g.y*T-8);nameTag('Pulang',g.x*T+8,g.y*T-12);}});return;}
- for(const id in remotes){const r=remotes[id];if(!(r.slot>=0))continue;const g=gateXY(r.slot),q=r.slot;
-  E.push({y:(g.y+1)*T,d:()=>{ctx.drawImage(SP.gate,g.x*T,g.y*T-8);nameTag('Desa '+String(r.n).slice(0,10),g.x*T+8,g.y*T-12-(q%2)*8);}});}}
+ if(visiting){E.push(gateDraw(GDEF[GDEF[visiting.slot>=0?visiting.slot:0].opp],'Pulang'));return;}
+ for(const id in remotes){const r=remotes[id];if(!(r.slot>=0))continue;E.push(gateDraw(GDEF[r.slot],'Desa '+String(r.n).slice(0,10)));}}
 /* data desa publik: hanya tata letak ladang, tanaman, hewan, pohon/batu. TANPA inventaris, gold, isi peti. */
 function pubFrom(s){return{v:1,savedAt:s.savedAt||Date.now(),S:{areas:s.S.areas,farms:s.S.farms},soil:s.soil,placed:s.placed,dyn:s.dyn,animals:s.animals};}
 function pushVillage(body){
@@ -1126,7 +1155,7 @@ function cleanVillage(d){
  const hs=(d.S&&typeof d.S==='object')?d.S:{};
  o.areas.forest=!!(hs.areas&&hs.areas.forest===true);
  if(hs.farms&&typeof hs.farms==='object')for(const p of PLOTS)if(hs.farms[p.id]===true)o.farms[p.id]=true;
- const okI=k=>{const i=Number(k);return Number.isInteger(i)&&i>=0&&i<W*H&&!inPlaza(i)?i:-1;};
+ const okI=k=>{const i=Number(k);return Number.isInteger(i)&&i>=0&&i<W*H&&!inPlaza(i)&&!inGateZone(i%W,(i/W)|0)?i:-1;};
  if(d.soil&&typeof d.soil==='object'){let n=0;for(const k of Object.keys(d.soil)){if(++n>8000)break;const i=okI(k);if(i<0)continue;const v=d.soil[k];if(!v||typeof v!=='object')continue;
   const crop=(typeof v.crop==='string'&&has(CROPS,v.crop))?v.crop:null;o.soil[i]={wet:clamp(num(v.wet,0),0,1),crop,prog:clamp(num(v.prog,0),0,20)};}}
  if(d.placed&&typeof d.placed==='object'){let n=0;for(const k of Object.keys(d.placed)){if(++n>8000)break;const i=okI(k);if(i<0)continue;const v=d.placed[k];if(v&&typeof v.t==='string'&&has(OKPL,v.t))o.placed[i]={t:v.t};}}
@@ -1147,12 +1176,13 @@ async function visitVillage(r){
   if(!cd){toast('Desa '+r.n+' belum membagikan datanya. Minta dia main sebentar lalu coba lagi.');return;}
   saveGame(true);
   home=snapshot();
-  visiting={uid:r.u,name:r.n,upd:data.updated_at};
-  const g=gateXY(0);
+  const q0=(r.slot>=0&&r.slot<GATES)?r.slot:0;
+  visiting={uid:r.u,name:r.n,upd:data.updated_at,slot:q0};
+  const gi=GDEF[GDEF[q0].opp].in;
   const sv=Object.assign({},home.S,{areas:cd.areas,farms:cd.farms,farmV:2});
-  try{applyData({S:sv,P:{x:g.x*T+8,y:(g.y+1)*T+8,dir:1},inv:new Array(24).fill(null),sel:0,soil:cd.soil,placed:cd.placed,chests:{},qp:{},dyn:cd.dyn,animals:cd.animals});}
+  try{applyData({S:sv,P:{x:gi.x,y:gi.y,dir:gi.d},inv:new Array(24).fill(null),sel:0,soil:cd.soil,placed:cd.placed,chests:{},qp:{},dyn:cd.dyn,animals:cd.animals});}
   catch(e){console.error(e);const h=home;visiting=null;home=null;try{applyData(h);}catch(e2){console.error(e2);}hideVisitBar();toast('Gagal memuat desa.');return;}
-  closePanels();mpForce=true;showVisitBar();toast('Selamat datang di Desa '+r.n+'. Kamu hanya bisa melihat-lihat.');
+  closePanels();mpForce=true;showVisitBar();toast('Selamat datang di Desa '+r.n+'. Hanya pemiliknya yang bisa bertani di sini.');
  }catch(e){console.error(e);toast('Gagal memuat desa: '+(e.message||e));}
  finally{visitBusy=false;}}
 function goHome(){
@@ -1208,7 +1238,7 @@ function mpTick(dt){
   const dx=r.tx-r.x,dy=r.ty-r.y;if(dx*dx+dy*dy>4096){r.x=r.tx;r.y=r.ty;}else{const k=Math.min(1,dt*12);r.x+=dx*k;r.y+=dy*k;}
   if(r.m)r.anim+=dt*(r.run?11:7);else r.anim=0;}
  {const used={};for(const id in remotes){if(remotes[id].slot>=0)used[remotes[id].slot]=1;}
-  for(const id in remotes){const r=remotes[id];if(r.u&&user&&r.u!==user.id&&!(r.slot>=0)){for(let q=0;q<GATES;q++)if(!used[q]){r.slot=q;used[q]=1;if(!visiting){const g=gateXY(q);burst(g.x*T+8,g.y*T+4,'#f0d048',16,55);chatAdd('','Gerbang Desa '+r.n+' muncul di alun-alun.',1);}break;}}}}
+  for(const id in remotes){const r=remotes[id];if(r.u&&user&&r.u!==user.id&&!(r.slot>=0)){for(let q=0;q<GATES;q++)if(!used[q]){r.slot=q;used[q]=1;if(!visiting){const gd=GDEF[q],gx=(gd.t[0][0]+gd.t[1][0]+1)*T/2,gy=(gd.t[0][1]+gd.t[1][1]+1)*T/2;burst(gx,gy,'#f0d048',24,60);beep(660,.2,'sine',.05);chatAdd('','Jalan baru ke Desa '+r.n+' terbuka dari pusat desa, arah '+gd.nm+'.',1);toast('Jalan ke Desa '+r.n+' terbuka di pusat desa, arah '+gd.nm+'!');}break;}}}}
  if(!mpOn||!mp)return;
  mpT+=dt;if(mpT<.12)return;
  const moving=!!P.moving&&!isPaused();

@@ -24,7 +24,11 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 #goldrow{display:flex;align-items:center;gap:6px;margin-top:4px;background:#8a5424;color:#ffe9a8;padding:4px 6px;border:2px solid #5a3213}
 #stam{position:fixed;left:12px;bottom:14px;width:24px;height:130px;padding:0;z-index:5;overflow:hidden;background:#3a2410;border:4px solid #5a3213}
 #stamfill{position:absolute;left:0;right:0;bottom:0;height:100%;background:#4cc04a;transition:height .2s}
-#stamlbl{position:fixed;left:6px;bottom:150px;font-size:8px;color:#fff;text-shadow:1px 1px 0 #000;z-index:5}
+#stamlbl,#hunlbl,#thrlbl{position:fixed;bottom:150px;font-size:8px;color:#fff;text-shadow:1px 1px 0 #000;z-index:5}
+#stamlbl{left:6px}#hunlbl{left:38px}#thrlbl{left:70px}
+#hun,#thr{position:fixed;bottom:14px;width:24px;height:130px;padding:0;z-index:5;overflow:hidden;background:#3a2410;border:4px solid #5a3213}
+#hun{left:44px}#thr{left:76px}
+#hunfill,#thrfill{position:absolute;left:0;right:0;bottom:0;height:100%;transition:height .2s}
 #auth{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#3d6b2a,#17230f 75%);padding:16px}
 #authBox{width:min(460px,94vw);padding:22px 20px;text-align:center;line-height:1.7;font-size:9px}
 #authBox h1{font-size:16px;margin-bottom:12px;color:#5a2a08;text-shadow:1px 1px 0 #f1c47e}
@@ -36,7 +40,7 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 #authBox{max-height:94vh;overflow:auto}
 #authBox input{display:block;width:100%;margin:6px 0;padding:9px;font-family:inherit;font-size:9px;color:#3b2108;background:#fff3d0;border:3px solid #5a3213;user-select:text;-webkit-user-select:text}
 #onl{position:fixed;left:12px;top:46px;font-size:8px;color:#ffe9a8;text-shadow:1px 1px 0 #000;z-index:4}
-#chat{position:fixed;left:48px;bottom:14px;width:min(320px,52vw);z-index:6;pointer-events:none}
+#chat{position:fixed;left:108px;bottom:14px;width:min(320px,52vw);z-index:6;pointer-events:none}
 #chatLog{font-size:8px;line-height:1.7;color:#fff;text-shadow:1px 1px 0 #000,-1px -1px 0 #000;word-break:break-word}
 #chatLog .sys{color:#ffe9a8}
 #chatLog b{color:#9ad8ff;font-weight:normal}
@@ -89,6 +93,8 @@ input[type=range]{width:200px;vertical-align:middle}
 </div>
 <div id="stamlbl">STA</div>
 <div id="stam"><div id="stamfill"></div></div>
+<div id="hunlbl">LAP</div><div id="hun"><div id="hunfill"></div></div>
+<div id="thrlbl">HAU</div><div id="thr"><div id="thrfill"></div></div>
 <div id="info"></div>
 <div id="hotbar" class="px"></div>
 <div id="btns"><button class="btn" id="bInv">Tas [I]</button><button class="btn" id="bMenu">Menu [Esc]</button></div>
@@ -113,7 +119,7 @@ input[type=range]{width:200px;vertical-align:middle}
   <div class="row"><div class="g">Simpan otomatis tiap 60 detik</div><span>Aktif</span></div>
   <button class="btn big" id="bReset">Mulai Game Baru</button></div>
 <div id="pMenu" class="panel px" style="width:320px"><h2>MENU</h2>
-  <button class="btn big" data-close>Lanjutkan</button><button class="btn big" data-open="pInv">Tas</button><button class="btn big" data-open="pQuest">Misi</button><button class="btn big" data-open="pCraft">Crafting</button><button class="btn big" data-open="pCal">Kalender</button><button class="btn big" data-open="pSet">Pengaturan</button><button class="btn big" id="bSave">Simpan Game</button><button class="btn big" id="bLoad">Muat Game</button><div id="acctTxt" style="font-size:8px;margin:10px 0 2px;line-height:1.6;word-break:break-all"></div><button class="btn big" id="bCloud" style="display:none">Simpan ke Cloud</button><button class="btn big" id="bHomeM" style="display:none">Pulang ke Desamu</button><button class="btn big" id="bRoom" style="display:none">Ganti Ruangan Online</button><button class="btn big" id="bAcct" style="display:none">Masuk / Daftar</button></div>
+  <button class="btn big" data-close>Lanjutkan</button><button class="btn big" data-open="pInv">Tas</button><button class="btn big" data-open="pQuest">Misi</button><button class="btn big" data-open="pCraft">Crafting</button><button class="btn big" data-open="pCal">Kalender</button><button class="btn big" data-open="pSet">Pengaturan</button><button class="btn big" id="bSave">Simpan Game</button><button class="btn big" id="bLoad">Muat Game</button><div id="acctTxt" style="font-size:8px;margin:10px 0 2px;line-height:1.6;word-break:break-all"></div><button class="btn big" id="bCloud" style="display:none">Simpan ke Cloud</button><button class="btn big" id="bHomeM" style="display:none">Pulang ke Desamu</button><button class="btn big" id="bRoom" style="display:none">Ganti Ruangan Online</button><button class="btn big" id="bAcct" style="display:none">Masuk / Daftar</button><button class="btn big" id="bMode">Ganti Mode</button></div>
 <div id="pChest" class="panel px"><button class="btn x" data-close>X</button><h2>PETI</h2><div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center"><div><div style="margin-bottom:4px">Isi Peti</div><div class="grid" id="chGrid"></div></div><div><div style="margin-bottom:4px">Tasmu</div><div class="grid" id="chInv"></div></div></div><div style="margin-top:8px;font-size:8px">Klik item untuk memindahkan.</div></div>
 
 <script>
@@ -159,14 +165,15 @@ def('can2','Penyiram Besar','tool',{buy:300,sell:100,d:'Menyiram 3 petak. Isi ai
 def('axe','Kapak','tool',{buy:60,sell:20,d:'Menebang pohon.'});
 def('axe2','Kapak Besi','tool',{buy:300,sell:100,d:'Menebang lebih cepat.'});
 def('pick','Beliung','tool',{buy:120,sell:40,d:'Memecah batu.'});
-for(const k in CROPS){const c=CROPS[k];def('seed_'+k,'Bibit '+c.n,'seed',{buy:c.seed,sell:Math.floor(c.seed/2),d:'Tanam di tanah bajak. Tumbuh '+c.days+' hari bila disiram.'});def(k,c.n,'crop',{sell:c.sell,heal:10,d:'Hasil panen. Bisa dijual atau dimakan.'});}
+for(const k in CROPS){const c=CROPS[k];def('seed_'+k,'Bibit '+c.n,'seed',{buy:c.seed,sell:Math.floor(c.seed/2),d:'Tanam di tanah bajak. Tumbuh '+c.days+' hari bila disiram.'});def(k,c.n,'crop',{sell:c.sell,heal:10,hun:12,d:'Hasil panen. Dijual atau dimakan: stamina +10, kenyang +12.'});}
 def('wood','Kayu','mat',{sell:6,d:'Bahan crafting.'});
 def('stone','Batu','mat',{sell:8,d:'Bahan crafting.'});
-def('egg','Telur','prod',{sell:25,heal:8,d:'Dari ayam atau bebek.'});
-def('milk','Susu','prod',{sell:60,heal:20,d:'Dari sapi atau kambing.'});
+def('egg','Telur','prod',{sell:25,heal:8,hun:10,d:'Dari ayam atau bebek.'});
+def('milk','Susu','prod',{sell:60,heal:20,hun:8,thr:25,d:'Dari sapi atau kambing.'});
 def('wool','Wol','prod',{sell:90,d:'Dari domba.'});
 def('feed','Pakan','feed',{buy:8,sell:2,d:'Beri makan hewan ternak.'});
-def('bread','Roti','food',{buy:30,sell:12,heal:40,d:'Memulihkan 40 stamina.'});
+def('bread','Roti','food',{buy:30,sell:12,heal:30,hun:40,d:'Mengenyangkan: kenyang +40, stamina +30.'});
+def('water','Air Minum','food',{buy:10,sell:3,heal:5,thr:45,d:'Menghilangkan haus +45.'});
 def('fence','Pagar Kayu','place',{sell:4,d:'Letakkan sebagai pagar.'});
 def('chest','Peti','place',{sell:30,d:'Menyimpan barang.'});
 def('sprinkler','Sprinkler','place',{sell:80,d:'Menyiram 8 petak sekitarnya tiap pagi.'});
@@ -175,7 +182,7 @@ def('bench','Bangku','place',{sell:40,d:'Dekorasi.'});
 def('sign','Papan Tanda','place',{sell:12,d:'Dekorasi.'});
 def('scarecrow','Orang-orangan Sawah','place',{sell:50,d:'Dekorasi pertanian.'});
 const SOLIDP={fence:1,chest:1,pot:1,bench:1,sign:1,scarecrow:1};
-const SHOPBUY=['seed_carrot','seed_potato','seed_tomato','seed_corn','seed_cabbage','seed_strawberry','seed_pumpkin','seed_rice','feed','bread','pick','hoe2','can2','axe2','hoe','can','axe'];
+const SHOPBUY=['seed_carrot','seed_potato','seed_tomato','seed_corn','seed_cabbage','seed_strawberry','seed_pumpkin','seed_rice','feed','bread','water','pick','hoe2','can2','axe2','hoe','can','axe'];
 const RECIPES=[
  {id:'fence',n:2,need:{wood:2}},{id:'chest',n:1,need:{wood:10}},{id:'sprinkler',n:1,need:{wood:4,stone:6}},
  {id:'pot',n:1,need:{stone:4,wood:1}},{id:'bench',n:1,need:{wood:8}},{id:'sign',n:1,need:{wood:3}},
@@ -378,6 +385,7 @@ function drawIcon(g,id){
   case 'milk':R(g,'#f6f6f6',5,5,6,9);R(g,'#4a8ad8',5,3,6,2);R(g,'#dfe8f0',6,6,1,7);R(g,'#6aa0e8',5,9,6,3);break;
   case 'wool':disc(g,'#f0f0f0',8,9,5);disc(g,'#fff',5,8,3);disc(g,'#fff',11,8,3);disc(g,'#d8d8d8',8,12,2);break;
   case 'feed':R(g,'#d8b84a',3,5,10,8);line(g,'#b8942e',3,6,12,12);line(g,'#b8942e',5,5,12,9);R(g,'#8a5a2c',3,8,10,1);R(g,'#f0d870',4,6,3,1);break;
+  case 'water':R(g,'#5a3213',6,2,4,2);R(g,'#cfe8f5',5,4,6,10);R(g,'#4aa0ff',5,7,6,7);R(g,'#ffffff',6,5,1,6);break;
   case 'bread':R(g,'#c8863a',3,6,10,6);R(g,'#e0a458',4,5,8,2);R(g,'#a8682a',5,8,1,2);R(g,'#a8682a',8,8,1,2);R(g,'#a8682a',11,8,1,2);break;
   case 'fence':R(g,'#a8723a',2,6,12,2);R(g,'#a8723a',2,10,12,2);R(g,'#8a5a2c',3,4,2,10);R(g,'#8a5a2c',11,4,2,10);break;
   case 'chest':g.drawImage(SP.chest,0,0);break;
@@ -460,10 +468,10 @@ function beep(f,d,type,v){if(!S||!S.set.sound)return;try{AC=AC||new (window.Audi
 
 /* ================= NEW / SAVE / LOAD ================= */
 function newState(){
- S={dayN:1,t:360,weather:'sunny',areas:{forest:false},farms:{},farmV:2,barnDay:0,water:20,stam:100,gold:150,set:S?S.set:{dayMin:18,sound:true}};
+ S={dayN:1,t:360,weather:'sunny',areas:{forest:false},farms:{},farmV:2,barnDay:0,water:20,stam:100,hun:100,thr:100,gold:150,set:S?S.set:{dayMin:18,sound:true}};
  P={x:9*T,y:10*T,dir:0,fr:0,anim:0,run:false};
  inv=new Array(24).fill(null);sel=0;
- addItem('hoe');addItem('can');addItem('axe');addItem('seed_carrot',10);addItem('seed_potato',5);addItem('bread',2);
+ addItem('hoe');addItem('can');addItem('axe');addItem('seed_carrot',10);addItem('seed_potato',5);addItem('bread',2);addItem('water',2);
  qp={};for(const q of QUESTS)qp[q.id]={n:0,claimed:false};
  genWorld();initEntities();parts=[];act=null;dlg=null;
 }
@@ -491,7 +499,7 @@ function loadGame(silent){
  catch(e){console.error(e);if(!silent)toast('Gagal memuat data.');return false;}
 }
 function applyData(d){
-  S=d.S;S.set=Object.assign({dayMin:18,sound:true},S.set||{});S.areas=S.areas||{forest:false};S.farms=S.farms||{};
+  S=d.S;if(typeof S.hun!=='number')S.hun=100;if(typeof S.thr!=='number')S.thr=100;S.set=Object.assign({dayMin:18,sound:true},S.set||{});S.areas=S.areas||{forest:false};S.farms=S.farms||{};
   P={x:d.P.x,y:d.P.y,dir:d.P.dir||0,fr:0,anim:0,run:false};inv=d.inv;sel=d.sel||0;qp=d.qp;for(const q of QUESTS)if(!qp[q.id])qp[q.id]={n:0,claimed:false};
   const keepNew=(S.farmV||0)<2;
   genWorld();
@@ -510,12 +518,14 @@ function dateInfo(){const m=(5+Math.floor((S.dayN-1)/28))%12,d=(S.dayN-1)%28+1;r
 function phaseName(){const h=S.t/60;return h<12?'Pagi':h<16?'Siang':h<19?'Sore':'Malam';}
 function dayLenSec(){return S.set.dayMin*60;}
 function newDay(forced){
+ const skip=forced?0:Math.max(0,1560-S.t)/1200;
  S.dayN++;S.t=360;const r=Math.random();S.weather=r<.55?'sunny':r<.8?'cloudy':'rain';
  for(const k in soil){soil[k].wet=0;}
  for(const k in placed){if(placed[k].t==='sprinkler'){const i=+k,x=i%W,y=(i/W)|0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const s=soil[idx(x+dx,y+dy)];if(s)s.wet=1;}}}
  if(S.weather==='rain')for(const k in soil)soil[k].wet=1;
  for(let i=0;i<W*H;i++){const o=objs[i];if(o&&o.t==='tree'&&o.stump>0){o.stump--;if(o.stump<=0){o.hp=3;o.stump=0;refSolid(i);}}}
- S.stam=forced?60:100;S.water=Math.max(S.water,0);
+ S.hun=Math.max(0,S.hun-22*skip);S.thr=Math.max(0,S.thr-32*skip);
+ {const base=forced?60:100;S.stam=weak()?Math.min(base,60):base;}S.water=Math.max(S.water,0);
  saveGame(true);
  const di=dateInfo();toast('Hari baru: '+WDAYS[di.wd]+', '+di.d+' '+MONTHS[di.m]+'. Cuaca: '+({sunny:'Cerah',cloudy:'Berawan',rain:'Hujan'})[S.weather]);
  beep(660,.2,'sine',.05);
@@ -538,7 +548,7 @@ function renderInv(){
  $('invGrid').innerHTML=h;
  const s=invSel!==null?inv[invSel]:inv[sel];const it=s?ITEMS[s.id]:null;
  $('invInfo').innerHTML=it?'<img src="'+iconURL(s.id)+'" style="width:48px;height:48px"><div style="margin:6px 0;color:#5a2a08">'+it.n+'</div><div>Jumlah: '+s.n+'</div><div>Jual: '+(it.sell||0)+' G</div><div style="margin-top:6px">'+it.d+'</div>':'<div>Slot kosong.</div>';
- const b=$('invUse');b.disabled=!it;b.textContent=!it?'Gunakan':(it.heal?'Makan / Minum':'Pilih di Hotbar');
+ const b=$('invUse');b.disabled=!it;b.textContent=!it?'Gunakan':(edible(it)?'Makan / Minum':'Pilih di Hotbar');
 }
 function bindInvGrid(el,get,onClick){
  el.addEventListener('click',e=>{const s=e.target.closest('.slot');if(!s)return;onClick(+s.dataset.i);});
@@ -549,8 +559,15 @@ $('invGrid').addEventListener('drop',e=>{e.preventDefault();const s=e.target.clo
 function mergeSwap(a,b){const A=inv[a],B=inv[b];if(A&&B&&A.id===B.id&&ITEMS[A.id].t!=='tool'){const m=Math.min(99-B.n,A.n);B.n+=m;A.n-=m;if(A.n<=0)inv[a]=null;}else{inv[a]=B;inv[b]=A;}}
 bindInvGrid($('invGrid'),null,i=>{if(invSel===null){invSel=inv[i]?i:null;if(!inv[i]){sel=Math.min(i,7);}}else{if(invSel!==i)mergeSwap(invSel,i);invSel=null;}dirtyInv=true;renderInv();});
 $('invUse').onclick=()=>{const i=invSel!==null?invSel:sel;const s=inv[i];if(!s)return;useFromInv(i);};
+function edible(it){return !!(it&&(it.heal||it.hun||it.thr));}
+function weak(){return S.hun<=0||S.thr<=0;}
+function eatItem(id){const it=ITEMS[id],p=[];
+ if(it.heal){S.stam=Math.min(100,S.stam+it.heal);p.push('Stamina +'+it.heal);}
+ if(it.hun){S.hun=Math.min(100,S.hun+it.hun);p.push('Kenyang +'+it.hun);}
+ if(it.thr){S.thr=Math.min(100,S.thr+it.thr);p.push('Haus -'+it.thr);}
+ removeItem(id,1);beep(520,.1,'sine');toast(p.join(' | '));}
 function useFromInv(i){const s=inv[i],it=ITEMS[s.id];
- if(it.heal){S.stam=Math.min(100,S.stam+it.heal);removeItem(s.id,1);beep(520,.1,'sine');toast('Stamina pulih.');}
+ if(edible(it)){eatItem(s.id);}
  else{if(i<8){sel=i;}else{const t=inv[sel];inv[sel]=inv[i];inv[i]=t;}toast(it.n+' dipilih.');}
  invSel=null;dirtyInv=true;if(curPanel==='pInv')renderInv();}
 function renderShop(){
@@ -604,6 +621,10 @@ $('bCloud').onclick=()=>{if(visiting)return toast('Pulang ke desamu dulu.');save
 $('bAcct').onclick=async()=>{
  if(user){if(!confirm('Keluar dari akun '+(user.email||'')+'? Progres disimpan dulu.'))return;try{saveGame(true);await pushCloud(true);await sb.auth.signOut();}catch(e){console.error(e);}location.reload();}
  else{closePanels();showLogin();}};
+$('bMode').onclick=async()=>{
+ if(!confirm('Ganti mode? Progres disimpan dulu, lalu kembali ke layar pilihan mode.'))return;
+ try{saveGame(true);if(cloudEnabled())await pushCloud(true);}catch(e){console.error(e);}
+ location.reload();};
 // dialog
 function say(name,lines,cb,opts){dlg={name,lines,i:0,cb,opts};showDlg();}
 function showDlg(){const d=dlg;$('dlg').style.display='block';$('dlgName').textContent=d.name;$('dlgText').textContent=d.lines[d.i];const last=d.i>=d.lines.length-1;const o=$('dlgOpts');o.innerHTML='';
@@ -615,7 +636,8 @@ function hotbarRender(){let h='';for(let i=0;i<8;i++)h+=slotHTML(inv[i],i,i===se
 $('hotbar').addEventListener('click',e=>{const s=e.target.closest('.slot');if(!s)return;sel=+s.dataset.i;dirtyInv=true;});
 
 /* ================= ACTIONS ================= */
-function spend(c){if(S.stam<c){toast('Stamina habis! Makan atau tidur dulu.');return false;}S.stam-=c;return true;}
+const STAMK=0.6;
+function spend(c){c=c*STAMK*(weak()?1.5:1);if(S.stam<c){toast(weak()?'Kamu lemas karena lapar/haus! Makan atau minum dulu.':'Stamina habis! Makan atau tidur dulu.');return false;}S.stam-=c;return true;}
 function startAct(type,fn,dur){if(act)return;act={type,t:0,dur:dur||.4,fn,done:false,item:inv[sel]?inv[sel].id:null};}
 function burst(x,y,col,n,sp){for(let k=0;k<n;k++){const a=Math.random()*6.28,v=(sp||30)*(.4+Math.random());parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-20,l:.5+Math.random()*.3,c:col,g:90});}}
 const FARM={x0:6,y0:14,x1:28,y1:24};
@@ -679,7 +701,7 @@ function useItem(){
  else if(id==='pick'){const o=objs[i];if(o&&o.t==='rock'){if(!spend(3))return;startAct('pick',()=>{o.hp--;shake=2;burst(f.x*T+8,f.y*T+8,'#9a9aa3',6);beep(120,.1,'square');if(o.hp<=0){objs[i]=null;refSolid(i);const n=1+(Math.random()*3|0);addItem('stone',n);toast('+'+n+' Batu');}},.4);}}
  else if(D.t==='seed'){if(s&&!s.crop){startAct('plant',()=>{if(!inv[sel]||inv[sel].id!==id)return;const k=id.slice(5);removeItem(id,1);s.crop=k;s.prog=0;if(lastWet)s.wet=Math.max(s.wet,0);ev('plant',k,1);burst(f.x*T+8,f.y*T+8,'#c8a050',5);beep(250,.08,'triangle');},.4);}}
  else if(D.t==='place'){if(!tilePlaceOK(f.x,f.y,id))return;if(id==='chest'||true){removeItem(id,1);placed[i]={t:id};refSolid(i);if(id==='chest')chests[i]=new Array(16).fill(null);beep(220,.08,'square');}}
- else if(D.heal){S.stam=Math.min(100,S.stam+D.heal);removeItem(id,1);beep(520,.1,'sine');toast('Stamina +'+D.heal);}
+ else if(edible(D)){eatItem(id);}
 }
 function getTarget(){
  if(visiting){const f0=faceTile();return gateAt(f0.x,f0.y)?{label:'[E] Pulang ke desamu',run:goHome}:null;}
@@ -693,12 +715,16 @@ function getTarget(){
   if(b.t==='shop')return{label:'[E] Masuk Toko',run:()=>{shopTab='buy';openPanel('pShop');}};
   if(b.t==='stall')return{label:'[E] Jual hasil panen',run:()=>{shopTab='sell';openPanel('pShop');}};
   if(b.t==='barn')return{label:'[E] Ambil Pakan gratis',run:()=>{if(S.barnDay===S.dayN)return toast('Pakan hari ini sudah diambil.');if(space('feed')<3)return toast('Tas penuh!');S.barnDay=S.dayN;addItem('feed',3);toast('Dapat 3 Pakan dari lumbung.');}};
-  if(b.t==='fountain'){const it=inv[sel];if(it&&(it.id==='can'||it.id==='can2'))return{label:'[Spasi] Isi air',run:()=>useItem()};return null;}}
+  if(b.t==='fountain'){const it=inv[sel],cn=it&&(it.id==='can'||it.id==='can2');return{label:cn?'[E] Minum | [Spasi] Isi air':'[E] Minum air',run:drinkSrc};}}
  const p=placed[i];if(p){if(p.t==='chest')return{label:'[E] Buka Peti',run:()=>openChest(i)};return{label:'[E] Ambil '+ITEMS[p.t].n,run:()=>pickupPlaced(i)};}
  const o=objs[i];if(o&&o.t==='lgate'){const pl=PLOTS.find(q=>q.id===o.k);return{label:'[E] Beli '+pl.name+' ('+pl.price+' G)',run:()=>buyPlot(o.k)};}
  if(o&&o.t==='gate')return{label:'Gerbang terkunci (Izin Hutan 250 G)',run:()=>toast('Beli Izin Hutan di toko Mira.')};
- if(ground[i]===1&&inv[sel]&&(inv[sel].id==='can'||inv[sel].id==='can2'))return{label:'[Spasi] Isi air',run:()=>useItem()};
+ if(ground[i]===1){const cn=inv[sel]&&(inv[sel].id==='can'||inv[sel].id==='can2');return{label:cn?'[E] Minum | [Spasi] Isi air':'[E] Minum air',run:drinkSrc};}
  return null;}
+function drinkSrc(){
+ if(S.thr>=100)return toast('Kamu tidak haus.');
+ const f=faceTile();
+ startAct('water',()=>{S.thr=Math.min(100,S.thr+25);beep(400,.15,'sine');burst(f.x*T+8,f.y*T+8,'#7ad6ee',6);toast('Glek glek... Haus -25');},.45);}
 function interact(){if(isPaused()||act)return;const t=getTarget();if(t&&t.run){if(t.label.indexOf('[E]')===0||t.label.indexOf('Gerbang')===0||true)t.run();return;}useItem();}
 function nearestEnt(list,rad){let best=null,bd=1e9;const d=DIRS[P.dir];for(const e of list){const dx=e.x-P.x,dy=e.y-P.y,dist=Math.hypot(dx,dy);if(dist<rad&&(dx*d[0]+dy*d[1]>-3)&&dist<bd){bd=dist;best=e;}}return best;}
 function feed(a){removeItem('feed',1);a.fed=true;a.timer=PROD[a.t].d;burst(a.x,a.y-8,'#f0d870',6);beep(450,.1,'triangle');toast(a.name+' makan dengan lahap.');}
@@ -712,6 +738,16 @@ function talk(n){n.dir=Math.abs(P.x-n.x)>Math.abs(P.y-n.y)?(P.x>n.x?3:2):(P.y>n.
 /* ================= UPDATE ================= */
 function updateAct(dt){if(!act)return;act.t+=dt;if(!act.done&&act.t>=act.dur*.5){act.done=true;act.fn&&act.fn();}if(act.t>=act.dur)act=null;}
 function moveEnt(e,dx,dy){if(canStand(e.x+dx,e.y))e.x+=dx;else dx=0;if(canStand(e.x,e.y+dy))e.y+=dy;else dy=0;return dx!==0||dy!==0;}
+let vLv={h:0,t:0};
+function vitK(){return weak()?0:(S.hun<20||S.thr<20)?.5:1;}
+function vitals(dt){
+ if(visiting)return;
+ if(typeof S.hun!=='number')S.hun=100;if(typeof S.thr!=='number')S.thr=100;
+ const k=dt/dayLenSec();S.hun=Math.max(0,S.hun-45*k);S.thr=Math.max(0,S.thr-65*k);
+ const lv=v=>v<=0?2:v<25?1:0,h=lv(S.hun),t=lv(S.thr);
+ if(h>vLv.h)toast(h===2?'Kamu kelaparan! Stamina tidak pulih. Makan dulu.':'Perutmu keroncongan. Makan sesuatu.');
+ if(t>vLv.t)toast(t===2?'Kamu kehausan! Stamina tidak pulih. Minum dulu.':'Tenggorokanmu kering. Minum air.');
+ vLv.h=h;vLv.t=t;}
 function update(dt){
  // toast
  if(toastT>0){toastT-=dt;if(toastT<=0)$('toast').style.display='none';}
@@ -727,8 +763,9 @@ function update(dt){
  let mx=0,my=0;if(!act){if(keys.KeyW||keys.ArrowUp)my--;if(keys.KeyS||keys.ArrowDown)my++;if(keys.KeyA||keys.ArrowLeft)mx--;if(keys.KeyD||keys.ArrowRight)mx++;}
  const moving=mx!==0||my!==0;
  if(moving){if(mx!==0&&my===0)P.dir=mx<0?2:3;else if(my!==0&&mx===0)P.dir=my<0?1:0;else if(mx!==0&&my!==0){/* keep dir */}
-  const run=(keys.ShiftLeft||keys.ShiftRight)&&S.stam>1;P.run=run;const sp=run?100:62;const l=Math.hypot(mx,my);moveEnt(P,mx/l*sp*dt,my/l*sp*dt);if(run)S.stam=Math.max(0,S.stam-1.6*dt);P.anim+=dt*(run?11:7);}
- else{P.anim=0;S.stam=Math.min(100,S.stam+3.5*dt);}
+  const run=(keys.ShiftLeft||keys.ShiftRight)&&S.stam>1&&!weak();P.run=run;const sp=run?100:62;const l=Math.hypot(mx,my);moveEnt(P,mx/l*sp*dt,my/l*sp*dt);if(run)S.stam=Math.max(0,S.stam-0.8*dt);else S.stam=Math.min(100,S.stam+0.8*vitK()*dt);P.anim+=dt*(run?11:7);}
+ else{P.anim=0;S.stam=Math.min(100,S.stam+5*vitK()*dt);}
+ vitals(dt);
  P.moving=moving;
  updateAct(dt);
  if(shake>0)shake=Math.max(0,shake-dt*10);
@@ -901,6 +938,9 @@ function updateHUD(){
  const di=dateInfo(),hh=Math.floor(S.t/60)%24,mm=Math.floor(S.t%60/10)*10;
  $('mon').textContent=MONTHS[di.m];$('wd').textContent=WDAYS[di.wd];$('dt').textContent=di.d;$('clock').textContent=String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');$('phase').textContent=phaseName();$('goldn').textContent=S.gold;renderOnl();
  const sp=S.stam/100;$('stamfill').style.height=(sp*100)+'%';$('stamfill').style.background=sp>.5?'#4cc04a':sp>.25?'#e8c030':'#d83a2e';
+ {const hv=(typeof S.hun==='number'?S.hun:100)/100,tv=(typeof S.thr==='number'?S.thr:100)/100;
+  $('hunfill').style.height=(hv*100)+'%';$('hunfill').style.background=hv>.25?'#e8943a':'#d83a2e';
+  $('thrfill').style.height=(tv*100)+'%';$('thrfill').style.background=tv>.25?'#4aa0ff':'#d83a2e';}
  if(drawWeatherIcon.last!==S.weather){drawWeatherIcon.last=S.weather;drawWeatherIcon();}
  const it=inv[sel];let inf='';if(it){inf=ITEMS[it.id].n;if(it.id==='can'||it.id==='can2')inf+='  Air '+S.water+'/'+(it.id==='can2'?40:20);}$('info').textContent=inf;
  const t=(!isPaused()&&!act)?getTarget():null;const pr=$('prompt');if(t){pr.textContent=t.label;pr.style.display='block';}else pr.style.display='none';
@@ -942,8 +982,8 @@ function loop(now){
 }
 /* ================= LOGIN GOOGLE + CLOUD SAVE (Supabase) ================= */
 const GUEST_KEY='lembahPanenSave1';
-let SAVEKEY=GUEST_KEY,sb=null,user=null,started=false,cloudT=0,cloudBusy=false,cloudDirty=false,cloudStat='';
-function cloudEnabled(){return !!(sb&&user);}
+let SAVEKEY=GUEST_KEY,sb=null,user=null,started=false,cloudT=0,cloudBusy=false,cloudDirty=false,cloudStat='',MODE='';
+function cloudEnabled(){return MODE!=='local'&&!!(sb&&user);}
 const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function authShow(html,btns){$('auth').style.display='flex';$('authBody').innerHTML=html;const b=$('authBtns');b.innerHTML='';for(const x of (btns||[])){const e=document.createElement('button');e.className='btn big';e.textContent=x.label;e.disabled=!!x.dis;e.onclick=x.fn;b.appendChild(e);}}
 function authHide(){$('auth').style.display='none';}
@@ -951,12 +991,16 @@ function choose(html,btns){return new Promise(res=>authShow(html,btns.map(x=>({l
 function fmtSnap(d){try{return 'Hari ke-'+d.S.dayN+', '+d.S.gold+' G, disimpan '+(d.savedAt?new Date(d.savedAt).toLocaleString('id-ID'):'(waktu tidak diketahui)');}catch(e){return 'data tidak terbaca';}}
 function setCloudStat(st){cloudStat=st;updateAcct();}
 function updateAcct(){const a=$('acctTxt');if(!a)return;
- if(!sb)a.textContent=(SUPABASE_URL&&SUPABASE_ANON_KEY)?'Cloud: layanan tidak termuat. Mode tamu.':'Cloud belum diatur. Simpan hanya di perangkat ini.';
- else if(user)a.textContent='Akun: '+(user.email||'Google')+'\nCloud: '+({ok:'tersimpan',sync:'menyimpan...',err:'gagal, akan dicoba lagi','':'siap'})[cloudStat];
- else a.textContent='Mode tamu. Progres hanya di perangkat ini.';
+ const mn={local:'Lokal',public:'Publik',private:'Privat'}[MODE]||'-';
+ if(MODE==='local')a.textContent='Mode: Lokal\nProgres hanya di perangkat ini.';
+ else if(!sb)a.textContent='Mode: '+mn+'\nMenghubungkan...';
+ else if(user)a.textContent='Mode: '+mn+'\nAkun: '+(user.email||'Google')+'\nCloud: '+({ok:'tersimpan',sync:'menyimpan...',err:'gagal, akan dicoba lagi','':'siap'})[cloudStat];
+ else a.textContent='Mode: '+mn+'\nBelum login.';
  a.style.whiteSpace='pre-line';
- $('bAcct').style.display=sb?'block':'none';$('bAcct').textContent=user?'Keluar akun':'Masuk / Daftar';$('bRoom').style.display=user?'block':'none';
- $('bCloud').style.display=user?'block':'none';}
+ $('bAcct').style.display=(MODE!=='local'&&sb)?'block':'none';$('bAcct').textContent=user?'Keluar akun':'Masuk / Daftar';
+ $('bRoom').style.display='none';
+ $('bCloud').style.display=cloudEnabled()?'block':'none';
+ $('bMode').style.display='block';}
 async function pushCloud(force,snap){
  if(visiting)return false;
  if(!cloudEnabled())return false;
@@ -988,22 +1032,49 @@ async function syncFromCloud(){
   if(up){localStorage.setItem(SAVEKEY,JSON.stringify(guest));await pushCloud(true,guest);}
  }
 }
+const PRIVKEY='lembahPanenPrivCode';
+function privClean(c){return String(c||'').trim().toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,30);}
+async function privCheck(code){
+ const {data,error}=await sb.rpc('check_private_code',{p_code:code});
+ if(error)throw error;return data===true;}
+function privGate(msg){
+ return new Promise(res=>{
+  let saved='';try{saved=localStorage.getItem(PRIVKEY)||'';}catch(e){}
+  authShow('<h1>RUANG PRIVAT</h1><p>Masukkan kode ruangan dari Supabase. Hanya pemain dengan kode yang sama yang bertemu di ruangan ini.</p><input id="privCode" maxlength="30" placeholder="Kode ruangan" autocomplete="off" value="'+esc(saved)+'"><p id="privMsg" class="warn">'+esc(msg||'')+'</p>',
+   [{label:'Masuk Ruangan',fn:async()=>{
+     const setM=m=>{const e=$('privMsg');if(e)e.textContent=m;};
+     const code=privClean($('privCode').value);
+     if(code.length<3)return setM('Kode minimal 3 karakter.');
+     setM('Memeriksa kode...');
+     try{if(!(await privCheck(code)))return setM('Kode salah atau tidak ditemukan.');
+      try{localStorage.setItem(PRIVKEY,code);}catch(e){}
+      res(code);}
+     catch(e){console.error(e);const m=String(e.message||e);
+      setM(/check_private_code|PGRST202|42883/.test(m+(e.code||''))?'Fungsi check_private_code belum dibuat di Supabase. Jalankan supabase_privat.sql.':'Gagal memeriksa kode: '+m);}}},
+   {label:'Ganti Mode',fn:()=>location.reload()}]);
+ });}
 async function afterAuth(){
  SAVEKEY=GUEST_KEY+':'+user.id;updateAcct();
  authShow('<h1>LEMBAH PANEN</h1><p>Menyinkronkan data cloud...</p>',[]);
  try{await syncFromCloud();}catch(e){console.error('sync',e);setCloudStat('err');}
+ if(MODE==='private'){
+  let code='';
+  try{const sv=privClean(localStorage.getItem(PRIVKEY)||'');if(sv.length>=3&&await privCheck(sv))code=sv;}catch(e){}
+  if(!code)code=await privGate();
+  mpRoom='priv-'+code;
+ }else mpRoom='umum';
  authHide();startGame();
 }
 function showLogin(msg){
  const fileMode=location.protocol==='file:';
- authShow('<h1>LEMBAH PANEN</h1><p>Masuk dengan email atau Google agar progresmu tersimpan di cloud dan bisa main bareng online.</p><input id="emEmail" type="email" placeholder="Email" autocomplete="email"><input id="emPass" type="password" placeholder="Password (min. 6 karakter)" autocomplete="current-password"><p id="emMsg" class="warn"></p>'
+ authShow('<h1>LEMBAH PANEN</h1><p>'+(MODE==='private'?'Mode PRIVAT: login dulu, lalu masukkan kode ruangan.':'Mode PUBLIK: login agar progresmu tersimpan di cloud dan langsung bertemu pemain lain.')+'</p><input id="emEmail" type="email" placeholder="Email" autocomplete="email"><input id="emPass" type="password" placeholder="Password (min. 6 karakter)" autocomplete="current-password"><p id="emMsg" class="warn"></p>'
   +(fileMode?'<p class="warn">Login Google butuh halaman yang dibuka lewat http(s), yaitu hosting atau localhost, bukan file://.</p>':'')
   +(msg?'<p class="warn">'+esc(msg)+'</p>':''),
   [{label:'Masuk dengan Email',fn:()=>emailAuth('in')},
    {label:'Daftar Akun Baru',fn:()=>emailAuth('up')},
    {label:'Kirim Link Masuk ke Email',fn:()=>emailAuth('magic')},
    {label:'Masuk dengan Google',dis:fileMode,fn:googleLogin},
-   {label:started?'Batal':'Main tanpa login (simpan di perangkat ini)',fn:()=>{authHide();if(!started)startGame();}}]);
+   {label:started?'Batal':'Kembali ke Pilihan Mode',fn:()=>{if(started)authHide();else location.reload();}}]);
 }
 async function googleLogin(){
  try{const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname,queryParams:{prompt:'select_account'}}});if(error)throw error;}
@@ -1162,9 +1233,9 @@ function renderChat(){
 }
 function renderOnl(){
  const e=$('onl');let t;
- if(!cloudEnabled())t='Mode tamu. Login untuk main bareng.';
+ if(!cloudEnabled())t=MODE==='local'?'Mode Lokal. Tanpa akun, tidak online.':'Belum login.';
  else if(!mpOn)t='Menghubungkan online...';
- else t='Online: '+mpCount+' | Ruangan: '+mpRoom+' | Enter: chat';
+ else t='Online: '+mpCount+' | Ruangan: '+(MODE==='private'?'Privat':'Publik')+' | Enter: chat';
  if(e.textContent!==t)e.textContent=t;
  renderChat();
 }
@@ -1179,21 +1250,46 @@ $('bRoom').onclick=()=>{
  const room=(v.toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,20))||'umum';
  try{localStorage.setItem('lembahPanenRoom',room);}catch(e){}
  mpJoin(room);closePanels();};
+const SB_SRC='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
+const MODEKEY='lembahPanenMode';
+function loadSb(){return new Promise((res,rej)=>{
+ if(window.supabase){res();return;}
+ const sc=document.createElement('script');sc.src=SB_SRC;sc.onload=()=>res();sc.onerror=()=>rej(new Error('Layanan login tidak bisa dimuat'));document.head.appendChild(sc);});}
+function modeMenu(){
+ const ok=!!(SUPABASE_URL&&SUPABASE_ANON_KEY);
+ authShow('<h1>LEMBAH PANEN</h1><h2>Pilih Mode Bermain</h2>'
+  +'<p><b>LOKAL</b>: data di perangkat ini, tanpa akun.</p>'
+  +'<p><b>PUBLIK</b>: data cloud, wajib login, langsung bertemu pemain lain.</p>'
+  +'<p><b>PRIVAT</b>: data cloud, wajib login dan kode dari Supabase.</p>'
+  +(ok?'':'<p class="warn">Supabase belum diatur, hanya mode Lokal yang tersedia.</p>'),
+  [{label:'Lokal (tanpa akun)',fn:()=>pickMode('local')},
+   {label:'Publik (login, main bareng)',dis:!ok,fn:()=>pickMode('public')},
+   {label:'Privat (login + kode)',dis:!ok,fn:()=>pickMode('private')}]);
+}
+async function pickMode(m){
+ MODE=m;try{localStorage.setItem(MODEKEY,m);}catch(e){}
+ if(m==='local'){user=null;updateAcct();authHide();startGame();return;}
+ updateAcct();
+ authShow('<h1>LEMBAH PANEN</h1><p>Memuat...</p>',[]);
+ try{
+  await loadSb();
+  if(!sb){
+   let base=String(SUPABASE_URL).trim();try{base=new URL(base).origin;}catch(x){}
+   sb=window.supabase.createClient(base,String(SUPABASE_ANON_KEY).trim(),{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+   sb.auth.onAuthStateChange((ev,sess)=>{user=sess?sess.user:null;updateAcct();});}
+  const {data}=await sb.auth.getSession();user=data&&data.session?data.session.user:null;updateAcct();
+  if(user)await afterAuth();else showLogin();
+ }catch(e){console.error(e);
+  authShow('<h1>LEMBAH PANEN</h1><p class="warn">'+esc(e.message||e)+'</p><p>Mode Publik/Privat butuh koneksi internet.</p>',
+   [{label:'Kembali ke Pilihan Mode',fn:()=>location.reload()},{label:'Main Lokal',fn:()=>pickMode('local')}]);}
+}
 function boot(){
  updateAcct();
- if(!(SUPABASE_URL&&SUPABASE_ANON_KEY)){startGame();return;}
- authShow('<h1>LEMBAH PANEN</h1><p>Memuat...</p>',[]);
- const sc=document.createElement('script');
- sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
- sc.onload=async()=>{
-  try{let base=String(SUPABASE_URL).trim();try{base=new URL(base).origin;}catch(x){}
-   sb=window.supabase.createClient(base,String(SUPABASE_ANON_KEY).trim(),{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-   sb.auth.onAuthStateChange((ev,sess)=>{user=sess?sess.user:null;updateAcct();});
-   const {data}=await sb.auth.getSession();user=data&&data.session?data.session.user:null;updateAcct();
-   if(user)await afterAuth();else showLogin();}
-  catch(e){console.error(e);sb=null;updateAcct();authHide();startGame();}};
- sc.onerror=()=>authShow('<h1>LEMBAH PANEN</h1><p class="warn">Layanan login tidak bisa dimuat (offline?). Kamu tetap bisa bermain tanpa login.</p>',[{label:'Main tanpa login',fn:()=>{authHide();startGame();}}]);
- document.head.appendChild(sc);
+ // kembali dari login Google / link email: langsung lanjut ke mode yang tadi dipilih
+ let back='';try{back=localStorage.getItem(MODEKEY)||'';}catch(e){}
+ const fromAuth=/access_token|refresh_token|[?&]code=|error_description/.test(location.hash+location.search);
+ if(fromAuth&&(back==='public'||back==='private')&&SUPABASE_URL&&SUPABASE_ANON_KEY){pickMode(back);return;}
+ modeMenu();
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&started&&S){saveGame(true);if(cloudEnabled())pushCloud(true);}});
 function startGame(){
@@ -1204,7 +1300,7 @@ function startGame(){
  if(!loaded){S=null;newState();if(set)S.set=Object.assign(S.set,set);}
  else if(set)S.set=Object.assign(S.set,set);
  dirtyInv=true;updateHUD();hotbarRender();
- if(!loaded)say('Selamat Datang',['Selamat datang di Lembah Panen! Rumahmu ada di sini. Ladang menunggu di selatan.','Pakai Cangkul untuk membajak tanah, tanam bibit, lalu siram dengan Penyiram. Isi air di sungai, danau, atau air mancur.','Tekan E untuk berinteraksi, Spasi atau klik untuk memakai alat. Bicaralah dengan Pak Joko, Bu Sari, Mira, dan Dika. Selamat bertani!']);
+ if(!loaded)say('Selamat Datang',['Selamat datang di Lembah Panen! Rumahmu ada di sini. Ladang menunggu di selatan.','Jaga juga rasa lapar dan hausmu (bar di kiri bawah): makan Roti atau hasil panen, minum dari sungai, danau, atau air mancur.','Pakai Cangkul untuk membajak tanah, tanam bibit, lalu siram dengan Penyiram. Isi air di sungai, danau, atau air mancur.','Tekan E untuk berinteraksi, Spasi atau klik untuk memakai alat. Bicaralah dengan Pak Joko, Bu Sari, Mira, dan Dika. Selamat bertani!']);
  if(cloudEnabled())mpJoin(mpRoom);
  requestAnimationFrame(t=>{last=t;loop(t);});
 }

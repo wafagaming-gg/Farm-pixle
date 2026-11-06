@@ -40,6 +40,7 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 #chatLog{font-size:8px;line-height:1.7;color:#fff;text-shadow:1px 1px 0 #000,-1px -1px 0 #000;word-break:break-word}
 #chatLog .sys{color:#ffe9a8}
 #chatLog b{color:#9ad8ff;font-weight:normal}
+#visitBar{position:fixed;left:50%;top:8px;transform:translateX(-50%);display:none;align-items:center;gap:10px;z-index:7;background:rgba(40,20,5,.9);color:#ffe9a8;border:3px solid #f1c47e;padding:6px 10px;font-size:8px;max-width:64vw;line-height:1.6}
 #chatIn{display:none;pointer-events:auto;width:100%;margin-top:4px;padding:6px;font-family:inherit;font-size:9px;color:#3b2108;background:#fff3d0;border:3px solid #5a3213;user-select:text;-webkit-user-select:text}
 #hotbar{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);display:flex;gap:3px;padding:5px;z-index:5}
 .slot{width:50px;height:50px;background:#b9773a;border:3px solid #5a3213;position:relative;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:inset 0 0 0 2px #d99a58}
@@ -94,6 +95,7 @@ input[type=range]{width:200px;vertical-align:middle}
 <div id="prompt"></div>
 <div id="toast"></div>
 <div id="onl"></div>
+<div id="visitBar"><span id="visitTxt"></span><button class="btn" id="bHome">Pulang</button></div>
 <div id="chat"><div id="chatLog"></div><input id="chatIn" maxlength="120" placeholder="Ketik pesan, Enter kirim" autocomplete="off"></div>
 <div id="auth"><div id="authBox" class="px"><div id="authBody"></div><div id="authBtns"></div></div></div>
 <div id="dlg" class="px"><div class="nm" id="dlgName"></div><div id="dlgText"></div><div class="opts" id="dlgOpts"></div><div class="hint">[E] Lanjut</div></div>
@@ -111,7 +113,7 @@ input[type=range]{width:200px;vertical-align:middle}
   <div class="row"><div class="g">Simpan otomatis tiap 60 detik</div><span>Aktif</span></div>
   <button class="btn big" id="bReset">Mulai Game Baru</button></div>
 <div id="pMenu" class="panel px" style="width:320px"><h2>MENU</h2>
-  <button class="btn big" data-close>Lanjutkan</button><button class="btn big" data-open="pInv">Tas</button><button class="btn big" data-open="pQuest">Misi</button><button class="btn big" data-open="pCraft">Crafting</button><button class="btn big" data-open="pCal">Kalender</button><button class="btn big" data-open="pSet">Pengaturan</button><button class="btn big" id="bSave">Simpan Game</button><button class="btn big" id="bLoad">Muat Game</button><div id="acctTxt" style="font-size:8px;margin:10px 0 2px;line-height:1.6;word-break:break-all"></div><button class="btn big" id="bCloud" style="display:none">Simpan ke Cloud</button><button class="btn big" id="bRoom" style="display:none">Ganti Ruangan Online</button><button class="btn big" id="bAcct" style="display:none">Masuk / Daftar</button></div>
+  <button class="btn big" data-close>Lanjutkan</button><button class="btn big" data-open="pInv">Tas</button><button class="btn big" data-open="pQuest">Misi</button><button class="btn big" data-open="pCraft">Crafting</button><button class="btn big" data-open="pCal">Kalender</button><button class="btn big" data-open="pSet">Pengaturan</button><button class="btn big" id="bSave">Simpan Game</button><button class="btn big" id="bLoad">Muat Game</button><div id="acctTxt" style="font-size:8px;margin:10px 0 2px;line-height:1.6;word-break:break-all"></div><button class="btn big" id="bCloud" style="display:none">Simpan ke Cloud</button><button class="btn big" id="bHomeM" style="display:none">Pulang ke Desamu</button><button class="btn big" id="bRoom" style="display:none">Ganti Ruangan Online</button><button class="btn big" id="bAcct" style="display:none">Masuk / Daftar</button></div>
 <div id="pChest" class="panel px"><button class="btn x" data-close>X</button><h2>PETI</h2><div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center"><div><div style="margin-bottom:4px">Isi Peti</div><div class="grid" id="chGrid"></div></div><div><div style="margin-bottom:4px">Tasmu</div><div class="grid" id="chInv"></div></div></div><div style="margin-top:8px;font-size:8px">Klik item untuk memindahkan.</div></div>
 
 <script>
@@ -479,13 +481,17 @@ function snapshot(){
  const dyn=[];for(let i=0;i<W*H;i++){const o=objs[i];if(o&&o.dyn)dyn.push([i,o.t,o.v||0,o.hp||0,o.stump||0]);}
  return {v:1,savedAt:Date.now(),S,P:{x:P.x,y:P.y,dir:P.dir},inv,sel,soil,placed,chests,qp,dyn,animals:ANIMALS.map(a=>({t:a.t,name:a.name,x:a.x,y:a.y,fed:a.fed,ready:a.ready,timer:a.timer}))};
 }
-function saveGame(silent){try{localStorage.setItem(SAVEKEY,JSON.stringify(snapshot()));
+function saveGame(silent){if(visiting){if(!silent)toast('Pulang ke desamu dulu untuk menyimpan.');return false;}try{localStorage.setItem(SAVEKEY,JSON.stringify(snapshot()));
   if(!silent)toast('Game tersimpan.');
   if(cloudEnabled()){if(silent)pushCloud(false);else pushCloud(true).then(ok=>toast(ok?'Game tersimpan di perangkat dan cloud.':'Tersimpan di perangkat. Cloud gagal, akan dicoba lagi.'));}
   return true;}catch(e){if(!silent)toast('Gagal menyimpan.');return false;}}
 function loadGame(silent){
  try{const raw=localStorage.getItem(SAVEKEY);if(!raw){if(!silent)toast('Belum ada data tersimpan.');return false;}
-  const d=JSON.parse(raw);S=d.S;S.set=Object.assign({dayMin:18,sound:true},S.set||{});S.areas=S.areas||{forest:false};S.farms=S.farms||{};
+  const d=JSON.parse(raw);applyData(d);if(!silent)toast('Game dimuat.');return true;}
+ catch(e){console.error(e);if(!silent)toast('Gagal memuat data.');return false;}
+}
+function applyData(d){
+  S=d.S;S.set=Object.assign({dayMin:18,sound:true},S.set||{});S.areas=S.areas||{forest:false};S.farms=S.farms||{};
   P={x:d.P.x,y:d.P.y,dir:d.P.dir||0,fr:0,anim:0,run:false};inv=d.inv;sel=d.sel||0;qp=d.qp;for(const q of QUESTS)if(!qp[q.id])qp[q.id]={n:0,claimed:false};
   const keepNew=(S.farmV||0)<2;
   genWorld();
@@ -496,8 +502,7 @@ function loadGame(silent){
   setupFarms((S.farmV||0)<2);S.farmV=2;
   for(let i=0;i<W*H;i++)refSolid(i);
   initEntities();d.animals.forEach((s,k)=>{const a=ANIMALS[k];if(a&&a.t===s.t){a.x=s.x;a.y=s.y;a.fed=s.fed;a.ready=s.ready;a.timer=s.timer;}});
-  act=null;dlg=null;parts=[];dirtyInv=true;if(!silent)toast('Game dimuat.');return true;}
- catch(e){console.error(e);if(!silent)toast('Gagal memuat data.');return false;}
+  act=null;dlg=null;parts=[];dirtyInv=true;
 }
 
 /* ================= TIME / DAY ================= */
@@ -524,7 +529,7 @@ function faceTile(){const d=DIRS[P.dir];return{x:Math.floor((P.x+d[0]*12)/T),y:M
 /* ================= UI HELPERS ================= */
 function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';toastT=2.6;}
 function isPaused(){return !!curPanel||!!dlg;}
-function openPanel(id){closePanels(true);curPanel=id;$(id).style.display='block';renderPanel(id);}
+function openPanel(id){if(visiting&&id!=='pMenu'&&id!=='pSet'&&id!=='pCal'){toast('Tidak tersedia saat berkunjung.');return;}closePanels(true);curPanel=id;$(id).style.display='block';renderPanel(id);}
 function closePanels(keep){if(curPanel){$(curPanel).style.display='none';}curPanel=null;if(!keep){invSel=null;}}
 function renderPanel(id){({pInv:renderInv,pShop:renderShop,pCraft:renderCraft,pQuest:renderQuest,pCal:renderCal,pSet:renderSet,pMenu:()=>{},pChest:renderChest})[id]();}
 function slotHTML(s,i,cls,showNum){return '<div class="slot '+(cls||'')+'" data-i="'+i+'" draggable="true">'+(s?'<img src="'+iconURL(s.id)+'"><b>'+(s.n>1?s.n:'')+'</b>':'')+(showNum&&i<8?'<i>'+(i+1)+'</i>':'')+'</div>';}
@@ -580,7 +585,7 @@ function renderCal(){const di=dateInfo();$('calTitle').textContent=MONTHS[di.m].
 function renderSet(){$('dayMin').value=S.set.dayMin;$('dmv').textContent=S.set.dayMin;$('sndChk').checked=!!S.set.sound;}
 $('dayMin').oninput=e=>{S.set.dayMin=+e.target.value;$('dmv').textContent=S.set.dayMin;try{localStorage.setItem('lembahPanenSet',JSON.stringify(S.set));}catch(x){}};
 $('sndChk').onchange=e=>{S.set.sound=e.target.checked;try{localStorage.setItem('lembahPanenSet',JSON.stringify(S.set));}catch(x){}};
-$('bReset').onclick=()=>{if(confirm('Mulai game baru? Progres tersimpan'+(cloudEnabled()?' (termasuk di cloud)':'')+' akan ditimpa.')){newState();saveGame(true);if(cloudEnabled())pushCloud(true);closePanels();toast('Game baru dimulai.');}};
+$('bReset').onclick=()=>{if(visiting)return toast('Pulang ke desamu dulu.');if(confirm('Mulai game baru? Progres tersimpan'+(cloudEnabled()?' (termasuk di cloud)':'')+' akan ditimpa.')){newState();saveGame(true);if(cloudEnabled())pushCloud(true);closePanels();toast('Game baru dimulai.');}};
 function renderChest(){const c=chests[chestIdx]||(chests[chestIdx]=new Array(16).fill(null));let h='';c.forEach((s,i)=>h+=slotHTML(s,i,''));$('chGrid').innerHTML=h;h='';inv.forEach((s,i)=>h+=slotHTML(s,i,''));$('chInv').innerHTML=h;}
 $('chGrid').addEventListener('click',e=>{const s=e.target.closest('.slot');if(!s)return;const c=chests[chestIdx],i=+s.dataset.i,it=c[i];if(!it)return;const a=addItem(it.id,it.n);it.n-=a;if(it.n<=0)c[i]=null;renderChest();});
 $('chInv').addEventListener('click',e=>{const s=e.target.closest('.slot');if(!s)return;const c=chests[chestIdx],i=+s.dataset.i,it=inv[i];if(!it)return;let left=it.n;for(const t of c){if(t&&t.id===it.id&&t.n<99&&left>0){const a=Math.min(99-t.n,left);t.n+=a;left-=a;}}for(let k=0;k<c.length&&left>0;k++)if(!c[k]){const a=Math.min(99,left);c[k]={id:it.id,n:a};left-=a;}const moved=it.n-left;if(moved>0){it.n=left;if(it.n<=0)inv[i]=null;dirtyInv=true;}else toast('Peti penuh.');renderChest();});
@@ -592,10 +597,10 @@ document.addEventListener('click',e=>{
 $('bInv').onclick=()=>curPanel==='pInv'?closePanels():openPanel('pInv');
 $('bMenu').onclick=()=>curPanel==='pMenu'?closePanels():openPanel('pMenu');
 $('bSave').onclick=()=>saveGame();
-$('bLoad').onclick=async()=>{
+$('bLoad').onclick=async()=>{if(visiting){goHome();closePanels();return;}
  if(cloudEnabled()){try{const {data,error}=await sb.from('game_saves').select('data').eq('user_id',user.id).maybeSingle();if(error)throw error;if(data&&data.data)localStorage.setItem(SAVEKEY,JSON.stringify(data.data));}catch(e){console.error(e);toast('Gagal mengambil data cloud. Memuat data perangkat.');}}
  if(loadGame())closePanels();};
-$('bCloud').onclick=()=>{saveGame(true);pushCloud(true).then(ok=>toast(ok?'Tersimpan di cloud.':'Gagal simpan ke cloud. Cek koneksi.'));};
+$('bCloud').onclick=()=>{if(visiting)return toast('Pulang ke desamu dulu.');saveGame(true);pushCloud(true).then(ok=>toast(ok?'Tersimpan di cloud.':'Gagal simpan ke cloud. Cek koneksi.'));};
 $('bAcct').onclick=async()=>{
  if(user){if(!confirm('Keluar dari akun '+(user.email||'')+'? Progres disimpan dulu.'))return;try{saveGame(true);await pushCloud(true);await sb.auth.signOut();}catch(e){console.error(e);}location.reload();}
  else{closePanels();showLogin();}};
@@ -655,7 +660,7 @@ function tilePlaceOK(x,y,type){if(!inb(x,y))return false;const i=idx(x,y);if(gro
 function pickupPlaced(i){const p=placed[i];if(!p)return false;if(p.t==='chest'&&chests[i]&&chests[i].some(s=>s))return toast('Kosongkan peti dulu.'),true;if(space(p.t)<1)return toast('Tas penuh!'),true;addItem(p.t,1);delete placed[i];delete chests[i];refSolid(i);beep(300,.08);return true;}
 function lineTiles(f,n){const d=DIRS[P.dir],r=[];for(let k=0;k<n;k++)r.push({x:f.x+d[0]*k,y:f.y+d[1]*k});return r;}
 function useItem(){
- if(isPaused()||act)return;const f=faceTile();if(!inb(f.x,f.y))return;const i=idx(f.x,f.y),s=soil[i];
+ if(visiting||isPaused()||act)return;const f=faceTile();if(!inb(f.x,f.y))return;const i=idx(f.x,f.y),s=soil[i];
  if(s&&s.crop&&ripe(s)){startAct('harvest',()=>harvest(i),.45);return;}
  const it=inv[sel];if(!it)return;const D=ITEMS[it.id],id=it.id;
  if(id==='hoe'||id==='hoe2'){const tiles=lineTiles(f,id==='hoe2'?3:1);const ok=tiles.filter(t=>inb(t.x,t.y)&&canTill(t.x,t.y)&&ground[idx(t.x,t.y)]===0&&!solid[idx(t.x,t.y)]&&!soil[idx(t.x,t.y)]&&!placed[idx(t.x,t.y)]&&(!objs[idx(t.x,t.y)]||objs[idx(t.x,t.y)].t==='flower'));
@@ -677,9 +682,11 @@ function useItem(){
  else if(D.heal){S.stam=Math.min(100,S.stam+D.heal);removeItem(id,1);beep(520,.1,'sine');toast('Stamina +'+D.heal);}
 }
 function getTarget(){
+ if(visiting){const f0=faceTile();return gateAt(f0.x,f0.y)?{label:'[E] Pulang ke desamu',run:goHome}:null;}
  const n=nearestEnt(NPCS,26);if(n)return{label:'[E] Bicara: '+n.name,run:()=>talk(n)};
  const a=nearestEnt(ANIMALS,22);if(a){if(a.ready)return{label:'[E] Ambil '+PROD[a.t].n+' ('+a.name+')',run:()=>collect(a)};if(!a.fed&&countItem('feed')>0)return{label:'[E] Beri makan '+a.name,run:()=>feed(a)};return{label:a.name+(a.fed?' (kenyang)':' (lapar, butuh Pakan)'),run:()=>toast(a.fed?a.name+' sedang menghasilkan sesuatu.':a.name+' lapar. Beri Pakan!')};}
  const f=faceTile();if(!inb(f.x,f.y))return null;const i=idx(f.x,f.y),s=soil[i];
+ const gt=gateAt(f.x,f.y);if(gt)return{label:'[E] Kunjungi Desa '+gt.r.n,run:()=>visitVillage(gt.r)};
  if(s&&s.crop&&ripe(s))return{label:'[E] Panen '+CROPS[s.crop].n,run:()=>useItem()};
  const b=bigAt(f.x,f.y);
  if(b){if(b.t==='house'){if(f.y===b.y+b.h-1&&(f.x===8||f.x===9))return{label:'[E] Tidur / simpan',run:()=>say('Rumah',['Tidur sekarang? Hari akan berganti dan progres disimpan.'],null,[{label:'Tidur',fn:()=>newDay(false)},{label:'Nanti',fn:()=>{}}])};return null;}
@@ -867,8 +874,8 @@ function render(){
  for(const b of bigs){if(b.x*T>cx+VW||(b.x+b.w)*T<cx||b.y*T>cy+VH+16||(b.y+b.h)*T<cy-16)continue;E.push({y:(b.y+b.h)*T,d:()=>{const sp=b.t==='fountain'?SP.fountain[wf]:SP[b.spr];ctx.drawImage(sp,b.x*T+b.dx,b.y*T+b.dy);}});}
  for(const a of ANIMALS)E.push({y:a.y,d:()=>{const fr=Math.floor(a.ft)%2,sp=(a.t==='sheep'&&a.ready===false&&!a.fed&&a.sheared)?ANSP.sheared[fr]:ANSP[a.t][fr];ctx.drawImage(SP.shadow,Math.round(a.x-8),Math.round(a.y-4));ctx.save();ctx.translate(Math.round(a.x),Math.round(a.y-19));if(a.dir===2)ctx.scale(-1,1);ctx.drawImage(sp,-12,0);ctx.restore();if(a.ready){const bob=Math.sin(gtime*4)*2;ctx.drawImage(icon(PROD[a.t].id),Math.round(a.x-8),Math.round(a.y-36+bob));}else if(a.fed){ctx.fillStyle='#e03a5a';ctx.fillRect(Math.round(a.x-1),Math.round(a.y-26),3,2);}}});
  for(const n of NPCS)E.push({y:n.y,d:()=>drawChars(null,n.name,PAL[n.name],n.x,n.y,n.dir,n.anim?[0,1,0,2][Math.floor(n.anim)%4]:0,false)});
- for(const id in remotes){const r=remotes[id];E.push({y:r.y,d:()=>{drawChars(null,id,r.pal,r.x,r.y,r.d,r.m?[0,1,0,2][Math.floor(r.anim)%4]:0,false);nameTag(r.n,r.x,r.y-35,r.say,r.sayT);}});}
- E.push({y:P.y,d:()=>{drawPlayer();if(mpOn)nameTag(mpName,P.x,P.y-35,mySay,mySayT);}});
+ for(const id in remotes){const r=remotes[id];if(r.at!==curVillage())continue;E.push({y:r.y,d:()=>{drawChars(null,id,r.pal,r.x,r.y,r.d,r.m?[0,1,0,2][Math.floor(r.anim)%4]:0,false);nameTag(r.n,r.x,r.y-35,r.say,r.sayT);}});}
+ drawGatesInto(E);E.push({y:P.y,d:()=>{drawPlayer();if(mpOn)nameTag(mpName,P.x,P.y-35,mySay,mySayT);}});
  E.sort((a,b)=>a.y-b.y);for(const e of E)e.d();
  // particles
  for(const p of parts){ctx.fillStyle=p.c;ctx.fillRect(Math.round(p.x),Math.round(p.y),2,2);}
@@ -951,6 +958,7 @@ function updateAcct(){const a=$('acctTxt');if(!a)return;
  $('bAcct').style.display=sb?'block':'none';$('bAcct').textContent=user?'Keluar akun':'Masuk / Daftar';$('bRoom').style.display=user?'block':'none';
  $('bCloud').style.display=user?'block':'none';}
 async function pushCloud(force,snap){
+ if(visiting)return false;
  if(!cloudEnabled())return false;
  const now=Date.now();
  if(!force&&now-cloudT<20000){cloudDirty=true;return false;}
@@ -958,7 +966,7 @@ async function pushCloud(force,snap){
  cloudBusy=true;cloudT=now;cloudDirty=false;setCloudStat('sync');
  try{const body=snap||snapshot();
   const {error}=await sb.from('game_saves').upsert({user_id:user.id,data:body,updated_at:new Date().toISOString()},{onConflict:'user_id'});
-  if(error)throw error;cloudBusy=false;setCloudStat('ok');return true;}
+  if(error)throw error;pushVillage(body);cloudBusy=false;setCloudStat('ok');return true;}
  catch(e){console.error('cloud push',e);cloudBusy=false;cloudDirty=true;setCloudStat('err');return false;}
 }
 async function syncFromCloud(){
@@ -1014,8 +1022,74 @@ async function emailAuth(mode){
    if(!data.session)return setM('Pendaftaran berhasil. Cek email untuk konfirmasi, lalu masuk.');user=data.user;}
   else{const {data,error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error)throw error;user=data.user;}
   if(started)location.reload();else await afterAuth();
- }catch(e){console.error(e);setM('Gagal: '+(e.message||e));}
+ }catch(e){console.error(e);const m=String(e.message||e);setM('Gagal: '+m+(/invalid path/i.test(m)?' | Periksa SUPABASE_URL: harus tepat https://<ref>.supabase.co tanpa path lain.':''));}
 }
+/* ================= DESA PEMAIN LAIN (kunjungan, hanya-lihat) ================= */
+let visiting=null,home=null,visitBusy=false,villageErr='';
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const GATES=6;
+const has=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
+const OKPL={fence:1,chest:1,sprinkler:1,pot:1,bench:1,sign:1,scarecrow:1};
+function curVillage(){return visiting?visiting.uid:(user?user.id:'');}
+function gateXY(q){return{x:47+q*3,y:17};}
+function gateAt(x,y){
+ if(visiting){const g=gateXY(0);return(x===g.x&&y===g.y)?{ret:1}:null;}
+ for(const id in remotes){const r=remotes[id];if(r.slot>=0){const g=gateXY(r.slot);if(g.x===x&&g.y===y)return{r};}}
+ return null;}
+function drawGatesInto(E){
+ if(visiting){const g=gateXY(0);E.push({y:(g.y+1)*T,d:()=>{ctx.drawImage(SP.gate,g.x*T,g.y*T-8);nameTag('Pulang',g.x*T+8,g.y*T-12);}});return;}
+ for(const id in remotes){const r=remotes[id];if(!(r.slot>=0))continue;const g=gateXY(r.slot),q=r.slot;
+  E.push({y:(g.y+1)*T,d:()=>{ctx.drawImage(SP.gate,g.x*T,g.y*T-8);nameTag('Desa '+String(r.n).slice(0,10),g.x*T+8,g.y*T-12-(q%2)*8);}});}}
+/* data desa publik: hanya tata letak ladang, tanaman, hewan, pohon/batu. TANPA inventaris, gold, isi peti. */
+function pubFrom(s){return{v:1,savedAt:s.savedAt||Date.now(),S:{areas:s.S.areas,farms:s.S.farms},soil:s.soil,placed:s.placed,dyn:s.dyn,animals:s.animals};}
+function pushVillage(body){
+ try{const pub=pubFrom(body);
+  sb.from('village_public').upsert({user_id:user.id,name:myName(),data:pub,updated_at:new Date().toISOString()},{onConflict:'user_id'})
+   .then(r=>{if(r&&r.error){villageErr=r.error.message||'gagal';console.warn('village push',r.error);}else villageErr='';}).catch(e=>console.warn('village push',e));
+ }catch(e){console.warn('village push',e);}}
+/* data dari pemain lain tidak dipercaya: saring semua bentuk dan nilainya */
+function inPlaza(i){const x=i%W,y=(i/W)|0;return x>=44&&x<=65&&y>=6&&y<=19;}
+function cleanVillage(d){
+ if(!d||typeof d!=='object')return null;
+ const o={soil:{},placed:{},dyn:[],animals:[],areas:{forest:false},farms:{}};
+ const hs=(d.S&&typeof d.S==='object')?d.S:{};
+ o.areas.forest=!!(hs.areas&&hs.areas.forest===true);
+ if(hs.farms&&typeof hs.farms==='object')for(const p of PLOTS)if(hs.farms[p.id]===true)o.farms[p.id]=true;
+ const okI=k=>{const i=Number(k);return Number.isInteger(i)&&i>=0&&i<W*H&&!inPlaza(i)?i:-1;};
+ if(d.soil&&typeof d.soil==='object'){let n=0;for(const k of Object.keys(d.soil)){if(++n>8000)break;const i=okI(k);if(i<0)continue;const v=d.soil[k];if(!v||typeof v!=='object')continue;
+  const crop=(typeof v.crop==='string'&&has(CROPS,v.crop))?v.crop:null;o.soil[i]={wet:clamp(num(v.wet,0),0,1),crop,prog:clamp(num(v.prog,0),0,20)};}}
+ if(d.placed&&typeof d.placed==='object'){let n=0;for(const k of Object.keys(d.placed)){if(++n>8000)break;const i=okI(k);if(i<0)continue;const v=d.placed[k];if(v&&typeof v.t==='string'&&has(OKPL,v.t))o.placed[i]={t:v.t};}}
+ if(Array.isArray(d.dyn)){for(const a of d.dyn.slice(0,9000)){if(!Array.isArray(a))continue;const i=okI(a[0]);if(i<0)continue;const t=a[1];if(t!=='tree'&&t!=='rock'&&t!=='bush'&&t!=='flower')continue;
+  o.dyn.push([i,t,clamp(num(a[2],0)|0,0,2),clamp(num(a[3],0)|0,0,3),clamp(num(a[4],0)|0,0,4)]);}}
+ if(Array.isArray(d.animals)&&d.animals.length<=11){for(const a of d.animals){if(!a||typeof a!=='object'||typeof a.t!=='string'||!has(ANSP,a.t)||a.t==='sheared'){o.animals=[];break;}
+  o.animals.push({t:a.t,name:String(a.name||'').slice(0,12),x:clamp(num(a.x,0),0,W*T),y:clamp(num(a.y,0),0,H*T),fed:!!a.fed,ready:!!a.ready,timer:clamp(num(a.timer,0),0,2)});}}
+ return o;}
+function showVisitBar(){$('visitTxt').textContent='Berkunjung ke Desa '+visiting.name+(visiting.upd?' | data '+new Date(visiting.upd).toLocaleString('id-ID'):'');$('visitBar').style.display='flex';$('bHomeM').style.display='block';}
+function hideVisitBar(){$('visitBar').style.display='none';$('bHomeM').style.display='none';}
+async function visitVillage(r){
+ if(visiting||visitBusy||!cloudEnabled()||!r||!UUID.test(r.u))return;visitBusy=true;
+ try{
+  toast('Menuju Desa '+r.n+'...');
+  const {data,error}=await sb.from('village_public').select('data,updated_at').eq('user_id',r.u).maybeSingle();
+  if(error){const m=String(error.message||error);throw new Error(/village_public|42P01/.test(m+(error.code||''))?'Tabel village_public belum dibuat. Jalankan SQL di PANDUAN_SUPABASE.md.':m);}
+  const cd=data&&cleanVillage(data.data);
+  if(!cd){toast('Desa '+r.n+' belum membagikan datanya. Minta dia main sebentar lalu coba lagi.');return;}
+  saveGame(true);
+  home=snapshot();
+  visiting={uid:r.u,name:r.n,upd:data.updated_at};
+  const g=gateXY(0);
+  const sv=Object.assign({},home.S,{areas:cd.areas,farms:cd.farms,farmV:2});
+  try{applyData({S:sv,P:{x:g.x*T+8,y:(g.y+1)*T+8,dir:1},inv:new Array(24).fill(null),sel:0,soil:cd.soil,placed:cd.placed,chests:{},qp:{},dyn:cd.dyn,animals:cd.animals});}
+  catch(e){console.error(e);const h=home;visiting=null;home=null;try{applyData(h);}catch(e2){console.error(e2);}hideVisitBar();toast('Gagal memuat desa.');return;}
+  closePanels();mpForce=true;showVisitBar();toast('Selamat datang di Desa '+r.n+'. Kamu hanya bisa melihat-lihat.');
+ }catch(e){console.error(e);toast('Gagal memuat desa: '+(e.message||e));}
+ finally{visitBusy=false;}}
+function goHome(){
+ if(!visiting||!home)return;const h=home;visiting=null;home=null;
+ try{applyData(h);}catch(e){console.error(e);}
+ closePanels();hideVisitBar();mpForce=true;toast('Kembali ke desamu.');}
+$('bHome').onclick=()=>goHome();
+$('bHomeM').onclick=()=>{goHome();closePanels();};
 /* ================= MULTIPLAYER ONLINE (Supabase Realtime) ================= */
 let mp=null,mpOn=false,mpCount=0,mpSid='',mpName='',mpRoom='umum',mpT=0,mpLast=0,mpForce=true,mpWas=false,mySay='',mySayT=0,chatOpen=false,chatLog=[],lastChat=0,remotes={},chatKey='';
 try{mpRoom=localStorage.getItem('lembahPanenRoom')||'umum';}catch(e){}
@@ -1025,6 +1099,7 @@ function palFor(id){let h=7;for(let i=0;i<id.length;i++)h=(Math.imul(h,31)+id.ch
 function myName(){const m=(user&&user.user_metadata)||{};return String(m.full_name||m.name||((user&&user.email)||'Pemain').split('@')[0]).slice(0,14);}
 function num(v,d){v=Number(v);return isFinite(v)?v:d;}
 function mpJoin(room){
+ if(visiting)goHome();
  if(!cloudEnabled())return;
  if(mp){try{sb.removeChannel(mp);}catch(e){}mp=null;}
  mpOn=false;mpCount=0;remotes={};mpRoom=room;mpName=myName();
@@ -1036,14 +1111,14 @@ function mpJoin(room){
   .on('presence',{event:'join'},e=>{mpForce=true;if(e.key!==mpSid){const n=e.newPresences&&e.newPresences[0]&&e.newPresences[0].n;chatAdd('',String(n||'Pemain').slice(0,14)+' bergabung.',1);}})
   .on('presence',{event:'leave'},e=>{const r=remotes[e.key];if(r){chatAdd('',r.n+' keluar.',1);delete remotes[e.key];}})
   .subscribe(async st=>{if(mp!==ch)return;
-   if(st==='SUBSCRIBED'){mpOn=true;mpForce=true;try{await ch.track({n:mpName});}catch(e){}chatAdd('','Terhubung ke ruangan "'+room+'".',1);}
+   if(st==='SUBSCRIBED'){mpOn=true;mpForce=true;try{await ch.track({n:mpName});}catch(e){}if(!visiting)pushCloud(true);chatAdd('','Terhubung ke ruangan "'+room+'".',1);}
    else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'||st==='CLOSED')mpOn=false;});
 }
 function onPos(p){
  if(!p||typeof p.id!=='string'||p.id===mpSid||p.id.length>24)return;
  let r=remotes[p.id];const x=clamp(num(p.x,0),0,W*T),y=clamp(num(p.y,0),0,H*T);
  if(!r){if(Object.keys(remotes).length>=30)return;r=remotes[p.id]={id:p.id,x,y,anim:0,pal:palFor(p.id),say:'',sayT:0};}
- r.tx=x;r.ty=y;r.d=clamp(num(p.d,0)|0,0,3);r.m=p.m?1:0;r.run=p.r?1:0;r.n=String(p.n||'Pemain').slice(0,14);r.seen=Date.now();
+ r.tx=x;r.ty=y;r.d=clamp(num(p.d,0)|0,0,3);r.m=p.m?1:0;r.run=p.r?1:0;r.n=String(p.n||'Pemain').slice(0,14);r.seen=Date.now();r.u=UUID.test(p.u)?p.u:'';r.at=UUID.test(p.a)?p.a:r.u;
 }
 function onChat(p){
  if(!p||typeof p.id!=='string'||p.id===mpSid)return;
@@ -1061,12 +1136,14 @@ function mpTick(dt){
  for(const id in remotes){const r=remotes[id];if(now-r.seen>6000){delete remotes[id];continue;}
   const dx=r.tx-r.x,dy=r.ty-r.y;if(dx*dx+dy*dy>4096){r.x=r.tx;r.y=r.ty;}else{const k=Math.min(1,dt*12);r.x+=dx*k;r.y+=dy*k;}
   if(r.m)r.anim+=dt*(r.run?11:7);else r.anim=0;}
+ {const used={};for(const id in remotes){if(remotes[id].slot>=0)used[remotes[id].slot]=1;}
+  for(const id in remotes){const r=remotes[id];if(r.u&&user&&r.u!==user.id&&!(r.slot>=0)){for(let q=0;q<GATES;q++)if(!used[q]){r.slot=q;used[q]=1;if(!visiting){const g=gateXY(q);burst(g.x*T+8,g.y*T+4,'#f0d048',16,55);chatAdd('','Gerbang Desa '+r.n+' muncul di alun-alun.',1);}break;}}}}
  if(!mpOn||!mp)return;
  mpT+=dt;if(mpT<.12)return;
  const moving=!!P.moving&&!isPaused();
  if(!(moving||mpWas||mpForce||now-mpLast>1000))return;
  mpT=0;mpLast=now;mpForce=false;mpWas=moving;
- const pr=mp.send({type:'broadcast',event:'pos',payload:{id:mpSid,n:mpName,x:Math.round(P.x*10)/10,y:Math.round(P.y*10)/10,d:P.dir,m:moving?1:0,r:P.run?1:0}});
+ const pr=mp.send({type:'broadcast',event:'pos',payload:{id:mpSid,n:mpName,u:user.id,a:curVillage(),x:Math.round(P.x*10)/10,y:Math.round(P.y*10)/10,d:P.dir,m:moving?1:0,r:P.run?1:0}});
  if(pr&&pr.catch)pr.catch(()=>{});
 }
 function nameTag(n,x,y,say,sT){
@@ -1109,7 +1186,8 @@ function boot(){
  const sc=document.createElement('script');
  sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
  sc.onload=async()=>{
-  try{sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  try{let base=String(SUPABASE_URL).trim();try{base=new URL(base).origin;}catch(x){}
+   sb=window.supabase.createClient(base,String(SUPABASE_ANON_KEY).trim(),{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
    sb.auth.onAuthStateChange((ev,sess)=>{user=sess?sess.user:null;updateAcct();});
    const {data}=await sb.auth.getSession();user=data&&data.session?data.session.user:null;updateAcct();
    if(user)await afterAuth();else showLogin();}
